@@ -1,0 +1,135 @@
+package com.CyberSecCourse.FinalProject.service.impl;
+
+import com.CyberSecCourse.FinalProject.dto.request.InvoiceDetailRequest;
+import com.CyberSecCourse.FinalProject.dto.request.InvoiceRequest;
+import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
+import com.CyberSecCourse.FinalProject.entity.*;
+import com.CyberSecCourse.FinalProject.repository.*;
+import com.CyberSecCourse.FinalProject.service.CheckoutService;
+import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CheckoutServiceImpl implements CheckoutService {
+
+    private final InvoiceRepository invoiceRepository;
+
+    private final InvoiceDetailRepository invoiceDetailRepository;
+
+    private final ProductRepository productRepository;
+
+    private final CustomerRepository customerRepository;
+
+    private final CartItemRepository cartItemRepository;
+
+    private  final  CartRepository cartRepository;
+
+    @Override
+    public void checkOut1(InvoiceRequest invoiceRequest, ProductRequestDTO productRequestDTO) {
+
+        Optional<Customer> c = customerRepository.findById(invoiceRequest.getCustomerId());
+
+    //to Invoice
+        Invoice invoice  =  Invoice.builder()
+                .invoice_date(invoiceRequest.getInvoice_date())
+                .invoice_status(invoiceRequest.getInvoice_status())
+                .note(invoiceRequest.getNote())
+                .customer(c.orElseThrow())
+                .order_code(invoiceRequest.getOrder_code())
+                .total_amount(invoiceRequest.getTotal_amount())
+                .exprired_at(invoiceRequest.getExpired_at())
+                .shipping_address(invoiceRequest.getShipping_address())
+                .payment_method(invoiceRequest.getPayment_method())
+                .payment_id(invoiceRequest.getPayment_id())
+                .build();
+
+        invoiceRepository.save(invoice);
+        // from cartItem to InvoiceDetail
+        if(productRequestDTO.getProductName() == null)
+        {
+            List<CartItem> cartItems =  cartItemRepository.findCartItemByCustomerId(c.get().getCustomerId());
+            cartItems.forEach(cartItem -> {
+                cartItemToInvoiceDetail(cartItem, invoice);
+            });
+
+            cartRepository.findByCustomerId(c.get().getCustomerAccount().getUsername()).setCartStatus("PROCESSTOCHECKOUT");
+
+
+        }
+        else{
+            InvoiceDetailId invoiceDetailId = InvoiceDetailId.builder()
+                    .product_id(productRequestDTO.getId())
+                    .invoice_id(invoice.getInvoice_id())
+                    .build();
+
+            InvoiceDetail invoiceDetail = InvoiceDetail.builder()
+                    .invoice(invoice)
+                    .unitPrice(productRequestDTO.getPrice())
+                    .subTotal(productRequestDTO.getPrice())
+                    .quantity(1)
+                    .id(invoiceDetailId)
+                    .build();
+
+            invoiceDetailRepository.save(invoiceDetail);
+        }
+
+        log.info("Invoice saved!");
+    }
+
+    @Override
+    public boolean checkOut2(String status , Long orderCode ) {
+
+        Invoice checkOutInvoice = invoiceRepository.findInvoiceByOrderCode(orderCode).orElseThrow();
+
+        if (checkOutInvoice == null)
+            return false;
+
+        if("paid".equalsIgnoreCase(status))
+        {
+            System.out.println("Sửa");
+
+            checkOutInvoice.setInvoice_status(InvoiceStatus.SHIPPING);
+            System.out.println("delete cart");
+            cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getCustomer().getCustomerId()));
+            cartRepository.delete(cartRepository.findByCustomerId(checkOutInvoice.getCustomer().getCustomerAccount().getUsername()));
+        }
+        else {
+            checkOutInvoice.setInvoice_status(InvoiceStatus.CANCELLED);
+        }
+        invoiceRepository.save(checkOutInvoice);
+        return true;
+    }
+    public InvoiceDetail cartItemToInvoiceDetail(CartItem cartItem, Invoice invoice) {
+
+        InvoiceDetailId invoiceDetailId = InvoiceDetailId.builder()
+                .invoice_id(invoice.getInvoice_id())
+                .product_id(cartItem.getProduct().getId())
+                .build();
+
+        InvoiceDetail invoiceDetail = InvoiceDetail.builder()
+                .id(invoiceDetailId)
+                .invoice(invoice)
+                .product(cartItem.getProduct())
+                .quantity(cartItem.getQuantity())
+                .subTotal( cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
+                .unitPrice(cartItem.getPrice())
+                .build();
+
+       invoiceDetailRepository.save(invoiceDetail);
+
+        return  invoiceDetail;
+    }
+
+}
