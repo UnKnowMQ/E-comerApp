@@ -1,0 +1,64 @@
+* {
+    margin: 0;
+    padding: 0;
+
+}
+
+.topblack {
+    height: 40px;
+    width: 100%;
+    background-color: black;
+}
+.banner img {
+    max-height: 700px;
+    object-fit: cover;
+}
+
+.tab-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 2rem;
+}
+
+.tab {
+    position: relative;
+    padding-bottom: 8px;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.3s ease-out;
+}
+
+.tab.active {
+    color: #0d6efd !important;
+}
+
+.tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background-color: #0d6efd;
+    transition: all 0.3s ease-out;
+}
+
+.cardTitleCustom {
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+  cursor: pointer;
+}
+
+.cardTitleCustom:hover {
+  color: #0d6efd;    
+  text-decoration: underline;
+}
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
