@@ -31,3 +31,26 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# -----------------------------
+# Spring Boot Configurations
+# -----------------------------
+
+# Main configs
+application.properties
+
+# Environment-specific configs
+application-dev.properties
+application-dev.yml
+application-prod.properties
+application-prod.yml
+application-test.properties
+application-test.yml
+
+# Example/template configs (an toàn để commit)
+!application.properties.example
+!application.yml.example
+!application-dev.properties.example
+!application-dev.yml.example
+

@@ -64,7 +64,6 @@ public class OrderController {
                 InvoiceRequest invoiceRequest = RequestBody.getInvoiceRequest();
                 invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
                 invoiceRequest.setOrder_code(orderCode);
-                invoiceRequest.setPayment_method("QR_CODE");
                 invoiceRequest.setExpired_at(new Date(paymentData.getExpiredAt()).toInstant());
 
                 log.info(invoiceRequest.toString());
@@ -94,7 +93,6 @@ public class OrderController {
                 InvoiceRequest invoiceRequest = RequestBody.getInvoiceRequest();
                 invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
                 invoiceRequest.setOrder_code(orderCode);
-                invoiceRequest.setPayment_method("QR_CODE");
                 invoiceRequest.setExpired_at(new Date(paymentData.getExpiredAt()).toInstant());
                 log.info(invoiceRequest.toString());
                 checkoutService.checkOut1(invoiceRequest,productRequestDTO);

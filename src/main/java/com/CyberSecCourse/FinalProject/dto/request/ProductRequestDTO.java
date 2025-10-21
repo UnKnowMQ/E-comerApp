@@ -36,7 +36,6 @@ public class ProductRequestDTO implements Serializable {
 
     private String warranty;
 
-
     private ProductStatus status;
 
     private Instant updated_at;

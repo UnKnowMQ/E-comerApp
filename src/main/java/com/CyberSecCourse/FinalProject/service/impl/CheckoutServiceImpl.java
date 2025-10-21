@@ -6,6 +6,7 @@ import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
 import com.CyberSecCourse.FinalProject.entity.*;
 import com.CyberSecCourse.FinalProject.repository.*;
 import com.CyberSecCourse.FinalProject.service.CheckoutService;
+import com.CyberSecCourse.FinalProject.service.InvoiceService;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,10 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final CartItemRepository cartItemRepository;
 
     private  final  CartRepository cartRepository;
+
+    private final InvoiceServiceImpl invoiceServiceImpl;
+
+    private final MailServiceImpl mailService;
 
     @Override
     public void checkOut1(InvoiceRequest invoiceRequest, ProductRequestDTO productRequestDTO) {
@@ -73,10 +78,12 @@ public class CheckoutServiceImpl implements CheckoutService {
                     .product_id(productRequestDTO.getId())
                     .invoice_id(invoice.getInvoice_id())
                     .build();
+            Product product = productRepository.findById(productRequestDTO.getId()).orElseThrow();
 
             InvoiceDetail invoiceDetail = InvoiceDetail.builder()
                     .invoice(invoice)
                     .unitPrice(productRequestDTO.getPrice())
+                    .product(product)
                     .subTotal(productRequestDTO.getPrice())
                     .quantity(1)
                     .id(invoiceDetailId)
@@ -89,10 +96,11 @@ public class CheckoutServiceImpl implements CheckoutService {
     }
 
     @Override
-    public boolean checkOut2(String status , Long orderCode ) {
+    public boolean checkOut2(String status , Long orderCode  ) throws  Exception {
 
         Invoice checkOutInvoice = invoiceRepository.findInvoiceByOrderCode(orderCode).orElseThrow();
-
+        invoiceServiceImpl.createInvoice(checkOutInvoice);
+        mailService.sendMailWithAttachment(checkOutInvoice.getCustomer().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","src/main/resources/templates/Hoadon.pdf");
         if (checkOutInvoice == null)
             return false;
 
@@ -104,6 +112,8 @@ public class CheckoutServiceImpl implements CheckoutService {
             System.out.println("delete cart");
             cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getCustomer().getCustomerId()));
             cartRepository.delete(cartRepository.findByCustomerId(checkOutInvoice.getCustomer().getCustomerAccount().getUsername()));
+            invoiceServiceImpl.createInvoice(checkOutInvoice);
+            mailService.sendMailWithAttachment(checkOutInvoice.getCustomer().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","src/main/resources/templates/Hoadon.docx");
         }
         else {
             checkOutInvoice.setInvoice_status(InvoiceStatus.CANCELLED);

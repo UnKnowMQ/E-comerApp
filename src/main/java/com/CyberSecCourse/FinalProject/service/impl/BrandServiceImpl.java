@@ -16,6 +16,7 @@ public class BrandServiceImpl {
     private final BrandRepository brandRepository;
 
     public List<Brand> findAll() {
+
         return brandRepository.findAll();
     }
 

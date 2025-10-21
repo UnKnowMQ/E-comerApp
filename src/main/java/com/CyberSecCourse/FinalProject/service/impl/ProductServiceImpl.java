@@ -2,6 +2,7 @@ package com.CyberSecCourse.FinalProject.service.impl;
 
 import com.CyberSecCourse.FinalProject.dto.response.PageResponse;
 import com.CyberSecCourse.FinalProject.dto.response.ProductResponse;
+import com.CyberSecCourse.FinalProject.dto.response.ProductTopResponse;
 import com.CyberSecCourse.FinalProject.entity.Product;
 import com.CyberSecCourse.FinalProject.mapped.ProductMapper;
 import com.CyberSecCourse.FinalProject.repository.ProductRepository;
@@ -89,6 +90,11 @@ public class ProductServiceImpl implements ProductService {
         urlList =  productRepository.getImageByProductId(id);
         System.out.println(urlList.size());
         return  urlList;
+    }
+
+    @Override
+    public List<ProductTopResponse> getTopProduct() {
+        return productRepository.getTop3Product();
     }
 
 

@@ -100,8 +100,36 @@
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 			<version>3.4.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.5</version>
+		</dependency>
 
+			<!-- Core -->
+			<dependency>
+				<groupId>org.docx4j</groupId>
+				<artifactId>docx4j-core</artifactId>
+				<version>11.4.9</version>
+			</dependency>
 
+			<!-- JAXB implementation -->
+			<dependency>
+				<groupId>org.docx4j</groupId>
+				<artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+				<version>11.4.9</version>
+			</dependency>
+
+			<!-- Nếu muốn xuất PDF -->
+			<dependency>
+				<groupId>org.docx4j</groupId>
+				<artifactId>docx4j-export-fo</artifactId>
+				<version>11.4.9</version>
+			</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
 
 	</dependencies>

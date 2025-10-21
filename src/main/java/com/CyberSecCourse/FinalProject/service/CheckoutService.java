@@ -12,7 +12,7 @@ public interface CheckoutService {
 
     void checkOut1(InvoiceRequest invoiceRequest, ProductRequestDTO productRequestDTO);
 
-    boolean checkOut2(String status, Long orderCode);
+    boolean checkOut2(String status, Long orderCode) throws  Exception;
 
 
 

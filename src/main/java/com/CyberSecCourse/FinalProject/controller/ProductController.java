@@ -83,4 +83,15 @@ public class ProductController {
             return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         }
     }
+    @GetMapping("/get-top-product")
+    public ResponseData<?> getTopProduct( ) {
+        try{
+            return new ResponseData<>(HttpStatus.OK.value(),"Product found!",productService.getTopProduct());
+        }
+        catch (Exception e)
+        {
+            log.error("there is an error : {}",e.getMessage());
+            return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
 }
