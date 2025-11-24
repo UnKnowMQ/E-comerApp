@@ -100,16 +100,12 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         Invoice checkOutInvoice = invoiceRepository.findInvoiceByOrderCode(orderCode).orElseThrow();
         invoiceServiceImpl.createInvoice(checkOutInvoice);
-        mailService.sendMailWithAttachment(checkOutInvoice.getCustomer().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","src/main/resources/templates/Hoadon.pdf");
         if (checkOutInvoice == null)
             return false;
 
         if("paid".equalsIgnoreCase(status))
         {
-            System.out.println("Sửa");
-
             checkOutInvoice.setInvoice_status(InvoiceStatus.SHIPPING);
-            System.out.println("delete cart");
             cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getCustomer().getCustomerId()));
             cartRepository.delete(cartRepository.findByCustomerId(checkOutInvoice.getCustomer().getCustomerAccount().getUsername()));
             invoiceServiceImpl.createInvoice(checkOutInvoice);

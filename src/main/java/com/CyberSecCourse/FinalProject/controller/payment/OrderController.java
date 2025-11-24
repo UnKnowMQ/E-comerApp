@@ -4,23 +4,31 @@ package com.CyberSecCourse.FinalProject.controller.payment;
 import com.CyberSecCourse.FinalProject.dto.request.InvoiceRequest;
 import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
 import com.CyberSecCourse.FinalProject.dto.response.CartItemResponse;
+import com.CyberSecCourse.FinalProject.dto.response.ResponseData;
 import com.CyberSecCourse.FinalProject.service.CartService;
 import com.CyberSecCourse.FinalProject.service.impl.CartServiceImpl;
 import com.CyberSecCourse.FinalProject.service.impl.CheckoutServiceImpl;
 import com.CyberSecCourse.FinalProject.type.CreatePaymentLinkRequestBody;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.docx4j.wml.R;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 import vn.payos.PayOS;
 import vn.payos.*;
-import vn.payos.type.CheckoutResponseData;
-import vn.payos.type.ItemData;
-import vn.payos.type.PaymentData;
-import vn.payos.type.PaymentLinkData;
+import vn.payos.exception.PayOSException;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
+import vn.payos.model.webhooks.Webhook;
+import vn.payos.model.webhooks.WebhookData;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,139 +46,127 @@ public class OrderController {
 
     private final CartServiceImpl cartService;
 
-    @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody RequestBody ) {
+    @PostMapping("/create")
+    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody requestBody) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
-        try {
-            final String productName = RequestBody.getProductName();
-            final String username = RequestBody.getUsername();
-            final String description = RequestBody.getDescription();
-            final String returnUrl = RequestBody.getReturnUrl();
-            final String cancelUrl = RequestBody.getCancelUrl();
-            final int price = RequestBody.getPrice();
-            final ProductRequestDTO productRequestDTO = RequestBody.getProductRequestDTO();
 
-            // Gen order code
-            String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
+        try {
+            String productName = requestBody.getProductName();
+            String username = requestBody.getUsername();
+            String description = requestBody.getDescription();
+            String returnUrl = requestBody.getReturnUrl();
+            String cancelUrl = requestBody.getCancelUrl();
+            int price = requestBody.getPrice();
+            var productRequestDTO = requestBody.getProductRequestDTO();
+
+            // Gen order code (ví dụ như trước)
+            String currentTimeString = String.valueOf(new Date().getTime());
             long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
 
-            if(productRequestDTO.getProductName() != null) {
-                ItemData item = ItemData.builder().name(productRequestDTO.getProductName()).price(productRequestDTO.getPrice().intValue()).quantity(1).build();
-                PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                        .item(item).returnUrl(returnUrl).cancelUrl(cancelUrl).expiredAt(System.currentTimeMillis()/1000 + 30*60).build();
-                CheckoutResponseData data = payOS.createPaymentLink(paymentData);
-                //lưu pending status invoice vào db
-                InvoiceRequest invoiceRequest = RequestBody.getInvoiceRequest();
-                invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
-                invoiceRequest.setOrder_code(orderCode);
-                invoiceRequest.setExpired_at(new Date(paymentData.getExpiredAt()).toInstant());
 
-                log.info(invoiceRequest.toString());
+            CreatePaymentLinkRequest paymentRequest = CreatePaymentLinkRequest.builder()
+                    .orderCode(orderCode)
+                    .amount((long) price)
+                    .description(description)
+                    .cancelUrl(cancelUrl)
+                    .returnUrl(returnUrl)
+                    .build();
 
-                checkoutService.checkOut1(invoiceRequest,productRequestDTO);
+            if (productRequestDTO.getProductName() != null) {
+                // trường hợp 1 item
+                PaymentLinkItem item = PaymentLinkItem.builder()
+                        .name(productRequestDTO.getProductName())
+                        .price(productRequestDTO.getPrice().longValue())
+                        .quantity(1)
+                        .build();
 
-                response.put("error", 0);
-                response.put("message", "success");
-                response.set("data", objectMapper.valueToTree(data));
-                return response;
-            }
-            else{
-                List<CartItemResponse> cartItemResponses = cartService.getCartItemsByCustomer(username);
-                List<ItemData> items = new ArrayList<>();
-                cartItemResponses.forEach(cartItem ->{
-                    items.add(ItemData.builder()
-                                    .name(cartItem.getProductResponse().getProductName())
-                                    .price(cartItem.getProductResponse().getPrice().intValue())
-                                    .quantity(cartItem.getQuantity())
-                            .build());
-                });
-                PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                        .items(items).returnUrl(returnUrl).cancelUrl(cancelUrl).expiredAt(System.currentTimeMillis()/1000 + 30*60).build();
-
-                CheckoutResponseData data = payOS.createPaymentLink(paymentData);
-                //lưu pending status invoice vào db
-                InvoiceRequest invoiceRequest = RequestBody.getInvoiceRequest();
-                invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
-                invoiceRequest.setOrder_code(orderCode);
-                invoiceRequest.setExpired_at(new Date(paymentData.getExpiredAt()).toInstant());
-                log.info(invoiceRequest.toString());
-                checkoutService.checkOut1(invoiceRequest,productRequestDTO);
-                response.put("error", 0);
-                response.put("message", "success");
-                response.set("data", objectMapper.valueToTree(data));
-                return response;
+                paymentRequest.setItems(List.of(item));
+            } else {
+                // nhiều item từ cart
+                List<PaymentLinkItem> items = new ArrayList<>();
+                List<CartItemResponse> cartItems = cartService.getCartItemsByCustomer(username);
+                for (CartItemResponse cartItem : cartItems) {
+                    PaymentLinkItem it = PaymentLinkItem.builder()
+                            .name(cartItem.getProductResponse().getProductName())
+                            .price(cartItem.getProductResponse().getPrice().longValue())
+                            .quantity(cartItem.getQuantity())
+                            .build();
+                    items.add(it);
+                }
+                paymentRequest.setItems(items);
             }
 
+            CreatePaymentLinkResponse data = payOS.paymentRequests().create(paymentRequest);
+
+            // Lưu invoice pending vào DB
+            InvoiceRequest invoiceRequest = requestBody.getInvoiceRequest();
+            invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
+            invoiceRequest.setOrder_code(orderCode);
+            // expiredAt: SDK v2 có thể không dùng trường expiredAt như cũ, tùy config của bạn
+            invoiceRequest.setExpired_at(Instant.now().plusSeconds(30 * 60));
+
+            checkoutService.checkOut1(invoiceRequest, productRequestDTO);
+
+            response.put("error", 0);
+            response.put("message", "success");
+            // Chuyển đổi response v2 sang JSON
+            response.set("data", objectMapper.valueToTree(data));
+            return response;
+
+        } catch (PayOSException e) {
+            log.error("PayOS error", e);
+            response.put("error", -1);
+            response.put("message", e.getMessage());
+            response.set("data", null);
+            return response;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unexpected error", e);
             response.put("error", -1);
             response.put("message", "fail");
             response.set("data", null);
             return response;
-
         }
     }
 
-    @GetMapping(path = "/{orderId}")
-    public ObjectNode getOrderById(@PathVariable("orderId") long orderId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode response = objectMapper.createObjectNode();
+
+    @PostMapping("/webhook")
+    public ObjectNode webhookHandler(@RequestBody Webhook webhookData) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode response = mapper.createObjectNode();
 
         try {
-            PaymentLinkData order = payOS.getPaymentLinkInformation(orderId);
+            // 1. Xác thực chữ ký
+            var data = payOS.webhooks().verify(webhookData);
 
-            response.set("data", objectMapper.valueToTree(order));
+            // 2. Lấy dữ liệu giao dịch
+            Long orderCode = data.getOrderCode();
+            log.info("ORDER_CODE = {}", orderCode);
+
+            // 3. Cập nhật đơn hàng
+            checkoutService.checkOut2("PAID", orderCode);
+
             response.put("error", 0);
-            response.put("message", "ok");
+            response.put("message", "Webhook processed");
             return response;
+
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                checkoutService.checkOut2("FAIL",webhookData.getData().getOrderCode());
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
             response.put("error", -1);
             response.put("message", e.getMessage());
-            response.set("data", null);
-            return response;
-        }
-
-    }
-
-    @PutMapping(path = "/{orderId}")
-    public ObjectNode cancelOrder(@PathVariable("orderId") int orderId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode response = objectMapper.createObjectNode();
-        try {
-            PaymentLinkData order = payOS.cancelPaymentLink(orderId, null);
-            response.set("data", objectMapper.valueToTree(order));
-            response.put("error", 0);
-            response.put("message", "ok");
-            return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("error", -1);
-            response.put("message", e.getMessage());
-            response.set("data", null);
             return response;
         }
     }
 
-    @PostMapping(path = "/confirm-webhook")
-    public ObjectNode confirmWebhook(@RequestBody Map<String, String> requestBody) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode response = objectMapper.createObjectNode();
-        try {
-            String str = payOS.confirmWebhook(requestBody.get("webhookUrl"));
-            response.set("data", objectMapper.valueToTree(str));
-            response.put("error", 0);
-            response.put("message", "ok");
-            return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("error", -1);
-            response.put("message", e.getMessage());
-            response.set("data", null);
-            return response;
-        }
-    }
+
+
+
 
 
 
