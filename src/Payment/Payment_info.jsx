@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { useContext } from "react";
 import { ModalContext } from "../ModalContext";
+
 import { useNavigate } from "react-router-dom";
 // ...existing code...
 
@@ -42,10 +43,11 @@ const [username, setUsername] = useState(localStorage.getItem("username") || "Gu
   const [paymentMethod, setPaymentMethod] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [productName, setProductName] = useState("");
-
+  const [paymentType, setPaymentType] = useState("QRPAY");
   
 
   const { id } = location.state || {};
+
   
   let total = 0;
 
@@ -55,14 +57,13 @@ useEffect(() => {
     if(id !== undefined) {
     // Clear previous products before fetching new one
     setProducts([]);
-    axios.get("http://localhost:8036/product/get-product-by-id", {
+    axios.get(`${import.meta.env.VITE_APP_API}/product/get-product-by-id`, {
       params: { productId : id }, // query param
 
     })
       .then((res) => {
         const items = res.data?.data || [];
         setProducts([items]);
-        console.log("Products in payment info:", products);
         })
       .catch((err) => {
         console.error("Error products:", err);
@@ -93,7 +94,7 @@ const paymentData = {
       invoiceRequest: {
         total_amount: total,
         invoice_date: new Date().toISOString(),
-        payment_method: "string",
+        payment_method: paymentType,
         shipping_address: address,
         invoice_status: "pending",
         note: "string",
@@ -119,10 +120,11 @@ const paymentData = {
 
 
   }
+
     console.log("Payment Data:", paymentData);
     // Thêm headers vào đây
     axios.post(
-      "http://localhost:8036/Order/create",
+      `${import.meta.env.VITE_APP_API}/Order/create`,
       paymentData,
       {
         headers: {
@@ -152,7 +154,7 @@ const paymentData = {
       useEffect(() => {
     // Clear previous products before fetching new one
     setProducts([]);
-    axios.get("http://localhost:8036/cart/get-cart-by-customer-id", {
+    axios.get(`${import.meta.env.VITE_APP_API}/cart/get-cart-by-customer-id`, {
       params: { customerId : localStorage.getItem("username") },
       headers: {
         "Content-Type": "application/json",
@@ -173,6 +175,9 @@ const paymentData = {
     total += product.price;
   });
 
+  }
+    const paymentTypeChange = (event) => {
+    setPaymentType(event.target.value);
   }
   return (
   <main className="container">
@@ -278,38 +283,21 @@ const paymentData = {
               </div>
             </div>
 
-            <div className="col-12">
-              <label for="address2" className="form-label">Địa chỉ cụ thể <span className="text-body-secondary"></span></label>
-              <input type="text" className="form-control" id="address2" placeholder="Apartment or suite"/>
-            </div>
-
-
-        
           </div>
 
           <hr className="my-4"/>
 
-          <div className="form-check">
-            <input type="checkbox" className="form-check-input" id="same-address"/>
-            <label className="form-check-label" for="same-address">Shipping address is the same as my billing address</label>
-          </div>
 
-          <div className="form-check">
-            <input type="checkbox" className="form-check-input" id="save-info"/>
-            <label className="form-check-label" for="save-info">Save this information for next time</label>
-          </div>
-
-          <hr className="my-4"/>
 
           <h4 className="mb-3">Payment</h4>
 
           <div className="my-3">
             <div className="form-check">
-              <input id="credit" name="paymentMethod" type="radio" className="form-check-input"  required/>
+              <input id="credit" name="paymentMethod" type="radio" className="form-check-input" onChange={paymentTypeChange} value={"COD"}  required/>
               <label className="form-check-label" for="credit">Ship COD</label>
             </div>
             <div className="form-check">
-              <input id="debit" name="paymentMethod" type="radio" className="form-check-input" required/>
+              <input id="debit" name="paymentMethod" type="radio" className="form-check-input"  onChange={paymentTypeChange} value={"QRPAY"} required/>
               <label className="form-check-label" for="debit">QR Pay</label>
             </div>
 

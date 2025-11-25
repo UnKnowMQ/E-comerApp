@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { ModalContext } from "../ModalContext";
 import { useContext } from "react";
+import './products.css';
 // ...existing code...
 function Product_detail() {
    const [product, setProduct] = useState(null);
@@ -20,7 +21,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
   const navigate = useNavigate();
     useEffect(() => {
 
-    axios.get("http://localhost:8036/product/get-product-by-id", {
+    axios.get(`${process.env.REACT_APP_API}/product/get-product-by-id`, {
       params: { productId : id }, // query param
 
     })
@@ -32,7 +33,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
       .catch((err) => {
         console.error("Error products:", err);
       });
-      axios.get("http://localhost:8036/product/get-image-by-id", {
+      axios.get(`${process.env.REACT_APP_API}/product/get-image-by-id`, {
       params: { productId : id }, // query param
 
     })
@@ -54,7 +55,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
 
   try {
     const kq = await axios.post(
-      "http://localhost:8036/auth/introspect",
+      `${process.env.REACT_APP_API}/auth/introspect`,
       {},
       {
         headers: {
@@ -87,7 +88,7 @@ const carouselId = 'productCarousel';
 
     // Xử lý thêm vào giỏ hàng
     const kq = axios.post(
-      "http://localhost:8036/cart/create-cart",
+      `${process.env.REACT_APP_API}/cart/create-cart`,
       {},
       {
               params: {

@@ -13,8 +13,9 @@ function PaymentResult() {
       status : status,
       orderCode : orderCode,   
     };
-  axios.put(
-      "http://localhost:8036/invoice/set-checkout-result", 
+    
+  axios.get(
+      `${import.meta.env.VITE_APP_API}/Order`, 
       {},
       {
         params: { status: status, orderCode: orderCode },

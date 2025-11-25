@@ -48,7 +48,7 @@ function Header() {
     e.preventDefault();
     try {
       const res = await axios.post(
-        `http://localhost:8036/auth/login`,
+        `${import.meta.env.VITE_APP_API}/auth/login`,
         { username, password },
         { withCredentials: true }
       );
@@ -78,7 +78,7 @@ function Header() {
         ...registerForm,
         gender: registerForm.gender === "nữ" ? false : true,
       };
-      await axios.post(`http://localhost:8036/auth/register`, payload, {
+      await axios.post(`${import.meta.env.VITE_APP_API}/auth/register`, payload, {
         withCredentials: true,
       });
       alert("Đăng ký thành công!");
@@ -107,7 +107,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
 const checkAuth = async () => {
   try {
     const res = await axios.post(
-      'http://localhost:8036/auth/introspect',
+      `${import.meta.env.VITE_APP_API}/auth/introspect`,
       {},
       {
         headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
@@ -157,13 +157,12 @@ const checkAuth = async () => {
             <ul className="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0 ">
               		<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0 ">
 						<li class="nav-item active">
-							<a class="nav-link" href="index.html">Home</a>
+							<a class="nav-link" href="/">Trang chủ</a>
 						</li>
-						<li><a class="nav-link" href="/Products">Shop</a></li>
+						<li><a class="nav-link" href="/Products">Của hàng</a></li>
 						<li><a class="nav-link" href="about.html">About us</a></li>
-						<li><a class="nav-link" href="services.html">Services</a></li>
-						<li><a class="nav-link" href="blog.html">Blog</a></li>
-						<li><a class="nav-link" href="contact.html">Contact us</a></li>
+						<li><a class="nav-link" href="services.html">Dịch vụ</a></li>
+
 					</ul>
             </ul>
           <ul className="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">

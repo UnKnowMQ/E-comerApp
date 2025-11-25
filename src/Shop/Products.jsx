@@ -40,7 +40,7 @@ function Products () {
     const token = localStorage.getItem("jwt");
 
 
-    axios.get("http://localhost:8036/brand/get-brand", {
+    axios.get(`${import.meta.env.VITE_APP_API}/brand/get-brand`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -53,7 +53,7 @@ function Products () {
         console.error("Error brands:", err);
       });
       
-    axios.get("http://localhost:8036/category/get-category", {
+    axios.get(`${import.meta.env.VITE_APP_API}/category/get-category`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -67,8 +67,8 @@ function Products () {
       });
 
 
-
-    axios.get("http://localhost:8036/product/get-product", {
+    
+    axios.get(`${import.meta.env.VITE_APP_API}/product/get-product`, {
       params: { pageNo: page, pageSize: 10 }, // query param
       headers: {
         "Content-Type": "application/json",
@@ -153,7 +153,7 @@ function Products () {
         const tfilter = "productName:" + filter 
         // gọi API với filter, brand, category
         const params = { pageNo: page, pageSize: 10 ,sortBy:sort , brandName: brand, categoryName: category, search: tfilter};
-        axios.get("http://localhost:8036/product/get-products-multiple-searching-col", {
+        axios.get(`${import.meta.env.VITE_APP_API}/product/get-products-multiple-searching-col`, {
           params,
           headers: {
             "Content-Type": "application/json",
@@ -204,7 +204,7 @@ function Products () {
             />
             <h3 className="product-title">{product.productName}</h3>
             <strong className="product-price text-danger">
-              {product.price} Đ
+             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
             </strong>
             <span className="icon-cross text-white fs-2">
               <i className="bi bi-plus-circle-fill"></i>

@@ -32,7 +32,7 @@ function Cart () {
   
 
   useEffect(() => {
-        axios.get("http://localhost:8036/cart/get-cart-by-customer-id", {
+        axios.get(`${import.meta.env.VITE_APP_API}/cart/get-cart-by-customer-id`, {
       params: { customerId : localStorage.getItem("username") }, // query param
       headers: {
         "Content-Type": "application/json",
@@ -59,7 +59,7 @@ function Cart () {
     const updatedItems = cartItems.filter(item => item.productResponse.id !== itemId);
     setCartItems(updatedItems);
 
-     axios.delete("http://localhost:8036/cart/delete-cartItem-from-cart", {
+     axios.delete(`${import.meta.env.VITE_APP_API}/cart/delete-cartItem-from-cart`, {
       params: { customerId : localStorage.getItem("username") 
       , productId : itemId
       }, // query param

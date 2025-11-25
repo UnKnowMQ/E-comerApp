@@ -3,3 +3,8 @@
   height: 220px;
   object-fit: cover;
 }
+.carousel-inner{
+   width: 100%;
+  height: 440px;
+  object-fit: cover;
+}

@@ -31,11 +31,29 @@ import { useEffect } from 'react';
 
 function Homepage() {
    const images = [
-    "images/product-1.png",
-    "images/product-2.png",
-    "images/product-3.png",
-    "images/couch.png"
+    "https://res.cloudinary.com/dhcsnzbdu/image/upload/v1759482283/Baner-LenovoLOQ_747x350-moi_kxuyyj.jpg",
+    "https://res.cloudinary.com/dhcsnzbdu/image/upload/v1759481835/2f267f672ee4bf55a2fb3fd1bc85305a_r71jju.png",
+    "https://res.cloudinary.com/dhcsnzbdu/image/upload/v1759482280/747x350-ASUS-VIVOBOOK_iwdlvh.jpg",
+    "https://res.cloudinary.com/dhcsnzbdu/image/upload/v1759482282/PPE-LaptopRTX5000747x350_ysycjc.jpg"
   ];
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
+useEffect(() => {
+    axios.get(`${import.meta.env.VITE_APP_API}/product/get-top-product`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        const items = res.data?.data || [];
+		console.log(items);
+        setProducts(items);
+      })
+      .catch((err) => {
+        console.error("Error products:", err);
+      });
+	}, []);
+
 
   const settings = {
     dots: true,
@@ -48,6 +66,11 @@ function Homepage() {
     arrows: true,
   };
        
+const handleToProductDetail = (id) => {
+    
+    navigate("/Product_detail", { state: { id }});
+
+};
     
     return (
         <div>
@@ -56,8 +79,7 @@ function Homepage() {
 					<div class="row justify-content-between">
 						<div class="col-lg-4">
 							<div class="intro-excerpt">
-								<h1>Modern Interior <span clsas="d-block">Design Studio</span></h1>
-								<p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
+								<p class="mb-4">Công nghệ trong tầm tay – Hàng mới 100% bảo hành uy tín</p>
 								<p><a href="/Products" class="btn btn-warning">Khám phá các sản phẩm</a></p>
 							</div>
 						</div>
@@ -79,46 +101,22 @@ function Homepage() {
 				<div class="row">
 
 					<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-						<h2 class="mb-4 section-title">Crafted with excellent material.</h2>
-						<p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. </p>
-						<p><a href="shop.html" class="btn">Explore</a></p>
+						<h2 class="mb-4 section-title">Chất lượng đảm bảo</h2>
+						<p class="mb-4">Khám phá một số sản phẩm bán chạy </p>
 					</div> 
-
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-						<a class="product-item" href="cart.html">
-							<img src="images/product-1.png" class="img-fluid product-thumbnail"/>
-							<h3 class="product-title">Nordic Chair</h3>
-							<strong class="product-price">$50.00</strong>
-
+		  		{products.map((product) => (
+					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0" key={product.id} onClick={() => handleToProductDetail(product.id)}>
+						<a class="product-item" onClick={() => handleToProductDetail(product.id)} >
+							<img src={product.image} class="img-fluid product-thumbnail" alt={product.name}/>
+							<h3 class="product-title">{product.name}</h3>
+							<strong class="product-price">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</strong>
 							<span class="icon-cross">
-								<img src="images/cross.svg" class="img-fluid"/>
+								<img src="images/cross.svg" class="img-fluid" alt="cross"/>
 							</span>
 						</a>
 					</div> 
-
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-						<a class="product-item" href="cart.html">
-							<img src="images/product-2.png" class="img-fluid product-thumbnail"/>
-							<h3 class="product-title">Kruzo Aero Chair</h3>
-							<strong class="product-price">$78.00</strong>
-
-							<span class="icon-cross">
-								<img src="images/cross.svg" class="img-fluid"/>
-							</span>
-						</a>
-					</div>
-
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-						<a class="product-item" href="cart.html">
-							<img src="images/product-3.png" class="img-fluid product-thumbnail"/>
-							<h3 class="product-title">Ergonomic Chair</h3>
-							<strong class="product-price">$43.00</strong>
-
-							<span class="icon-cross">
-								<img src="images/cross.svg" class="img-fluid"/>
-							</span>
-						</a>
-					</div>
+		  ))}
+					
 
 				</div>
 			</div>
