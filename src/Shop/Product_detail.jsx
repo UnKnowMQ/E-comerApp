@@ -13,7 +13,8 @@ import './products.css';
 function Product_detail() {
    const [product, setProduct] = useState(null);
    const [images, setImages] = useState([]);
-const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(ModalContext);
+   const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(ModalContext);
+   const API_BASE = import.meta.env.VITE_APP_API || (window && window.__VITE_APP_API__) || 'https://demo-ecommerce-deployment.onrender.com';
 
   const location = useLocation();
   const { id } = location.state || {};
@@ -21,7 +22,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
   const navigate = useNavigate();
     useEffect(() => {
 
-    axios.get(`${process.env.REACT_APP_API}/product/get-product-by-id`, {
+    axios.get(`${import.meta.env.VITE_APP_API}/product/get-product-by-id`, {
       params: { productId : id }, // query param
 
     })
@@ -33,7 +34,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
       .catch((err) => {
         console.error("Error products:", err);
       });
-      axios.get(`${process.env.REACT_APP_API}/product/get-image-by-id`, {
+      axios.get(`${import.meta.env.VITE_APP_API}/product/get-image-by-id`, {
       params: { productId : id }, // query param
 
     })
@@ -55,7 +56,7 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
 
   try {
     const kq = await axios.post(
-      `${process.env.REACT_APP_API}/auth/introspect`,
+      `${import.meta.env.VITE_APP_API}/auth/introspect`,
       {},
       {
         headers: {
@@ -84,39 +85,45 @@ const carouselId = 'productCarousel';
   // nếu dùng SSR, chặn render trên server
   if (typeof window === 'undefined') return null; 
 
-  const handleToCart = () => {
+ const handleToCart = async () => {
+     const token = localStorage.getItem("jwt");
+     const customerId = localStorage.getItem("username");
 
-    // Xử lý thêm vào giỏ hàng
-    const kq = axios.post(
-      `${process.env.REACT_APP_API}/cart/create-cart`,
-      {},
-      {
-              params: {
-        customerId: localStorage.getItem("username"),
-        productId: id
-      },
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-        }
-        
-      },
-     
-    ).then((res) => {
-      if (res.status === 200) {
-        window.alert("Thêm vào giỏ hàng thành công");
-      } else {
-        window.alert("Thêm vào giỏ hàng thất bại");
-      }
-    }).catch((err) => {
-      console.error("Lỗi thêm vào giỏ hàng:", err);
-      window.alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
-      setShowLogin(true);
-        });
-    console.log(kq);
+     // Nếu chưa login hoặc customerId không hợp lệ -> yêu cầu login
+     if (!customerId || customerId === 'Unknown') {
+       window.alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
+       setShowLogin(true);
+       return;
+     }
 
+     try {
+       const res = await axios.post(
+         `${import.meta.env.VITE_APP_API}/cart/create-cart`,
+         {}, // body
+         {
+           params: {
+             customerId,
+             productId: id
+           },
+           headers: {
+             "Content-Type": "application/json",
+             "Authorization": `Bearer ${token}`
+           }
+         }
+       );
 
-  };
+       if (res.status === 200) {
+         window.alert("Thêm vào giỏ hàng thành công");
+       } else {
+         window.alert("Thêm vào giỏ hàng thất bại");
+       }
+     } catch (err) {
+       console.error("Lỗi thêm vào giỏ hàng:", err);
+       window.alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+       // nếu lỗi do auth, bật modal login
+       setShowLogin(true);
+     }
+   };
     return (
   
 <div className="container py-5">

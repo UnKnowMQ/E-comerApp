@@ -88,9 +88,9 @@ const paymentData = {
       productName : products[0].productName,
       description : "Thanh toan don hang",
       username : username,
-      returnUrl : "http://localhost:5173/PaymentResult",
+      returnUrl : `${import.meta.env.VITE_APP_FE_ENDPOINT}/PaymentResult`,
       price : total,
-      cancelUrl : "http://localhost:5173/PaymentResult",
+      cancelUrl : `${import.meta.env.VITE_APP_FE_ENDPOINT}/PaymentResult`,
       invoiceRequest: {
         total_amount: total,
         invoice_date: new Date().toISOString(),

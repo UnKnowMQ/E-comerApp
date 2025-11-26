@@ -14,28 +14,28 @@ function PaymentResult() {
       orderCode : orderCode,   
     };
     
-  axios.get(
-      `${import.meta.env.VITE_APP_API}/Order`, 
-      {},
-      {
-        params: { status: status, orderCode: orderCode },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-          "Content-Type": "application/json"
-        }
-      }
-    )
-      .then((res) => {
-        if(res.data.status === 200) {
-          console.log("Payment update response:", res.data);
-        } else {
-          alert("Payment failed. Please try again.");
-        }
-      })
-      .catch((err) => {
-        console.error("Error processing payment:", err);
-        alert("An error occurred while processing your payment. Please try again.");
-      });
+  // axios.get(
+  //     `${import.meta.env.VITE_APP_API}/Order`, 
+  //     {},
+  //     {
+  //       params: { status: status, orderCode: orderCode },
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+  //         "Content-Type": "application/json"
+  //       }
+  //     }
+  //   )
+  //     .then((res) => {
+  //       if(res.data.status === 200) {
+  //         console.log("Payment update response:", res.data);
+  //       } else {
+  //         alert("Payment failed. Please try again.");
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error processing payment:", err);
+  //       alert("An error occurred while processing your payment. Please try again.");
+  //     });
 
   return (
     <div className="container py-5 text-center">

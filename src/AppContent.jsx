@@ -18,7 +18,7 @@ import Up from "./up";
 import Filter from "./Search/Filter";
 import { ModalProvider } from "./ModalContext";
 import PaymentResult from "./Payment/Payment";
-import Cart from "./Cart/cart";
+import Cart from "./Cart/Cart";
 //import NavBar from "./NavBar/NavBar";
 
 function AppContent() {

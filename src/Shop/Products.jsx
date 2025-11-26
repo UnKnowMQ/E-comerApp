@@ -14,7 +14,7 @@ import '../assets/vendor/remixicon/remixicon.css';
 import '../assets/vendor/simple-datatables/style.css';
 import '../assets/css/style.css';
 
-import '../Shop/Products.css';
+import '../Shop/products.css';
 import '../assets/vendor/apexcharts/apexcharts.min.js';
 import '../assets/vendor/echarts/echarts.min.js';
 import '../assets/vendor/chart.js/chart.umd.js';
