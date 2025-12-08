@@ -17,6 +17,8 @@ import vn.payos.PayOS;
 import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
 
+import java.util.Map;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -33,23 +35,32 @@ public class PaymentController {
 
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
-        Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
 
         try {
-            // Init Response
+            Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
+
+            // 1. Xác thực webhook
+            WebhookData verifiedData = payOS.webhooks().verify(webhookBody);
+
+
+           //  2. Lấy payload map an toàn
+            String invoiceStatus = verifiedData.getDesc() != null ? verifiedData.getDesc() : "UNKNOWN";
+            Long orderCode = verifiedData.getOrderCode() != null  ? verifiedData.getOrderCode(): null;
+
+            log.info("WebhookData: " + verifiedData);
+            log.info("Webhook: " + webhookBody);
+//
+//            // 3. Cập nhật DB
+            if (orderCode != null) {
+                checkoutService.checkOut2(invoiceStatus, orderCode);
+            }
+
+            // 4. Trả response
             response.put("error", 0);
             response.put("message", "Webhook delivered");
             response.set("data", null);
-
-            WebhookData data = payOS.webhooks().verify(webhookBody);
-            JsonNode readData  = objectMapper.valueToTree(webhookBody.getData());
-            String invoiceStatus = readData.get("status").asText();
-            log.info("INVOICE_STATUS: " + invoiceStatus);
-            Long orderCode = readData.get("orderCode").asLong();
-            checkoutService.checkOut2(invoiceStatus,orderCode);
-            log.info("ORDER_CODE: " + orderCode);
-            log.info("datawebhookpayos:" + data);
             return response;
+
         } catch (Exception e) {
             e.printStackTrace();
             response.put("error", -1);
@@ -58,6 +69,7 @@ public class PaymentController {
             return response;
         }
     }
+
 
 
 }

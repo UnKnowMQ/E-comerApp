@@ -10,6 +10,7 @@ import com.CyberSecCourse.FinalProject.service.InvoiceService;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,6 +41,9 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final InvoiceServiceImpl invoiceServiceImpl;
 
     private final MailServiceImpl mailService;
+//
+//    @Value("${filePath}")
+//    private String filePath;
 
     @Override
     public void checkOut1(InvoiceRequest invoiceRequest, ProductRequestDTO productRequestDTO) {
@@ -103,13 +107,15 @@ public class CheckoutServiceImpl implements CheckoutService {
         if (checkOutInvoice == null)
             return false;
 
-        if("paid".equalsIgnoreCase(status))
+        if("success".equalsIgnoreCase(status))
         {
             checkOutInvoice.setInvoice_status(InvoiceStatus.SHIPPING);
             cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getCustomer().getCustomerId()));
-            cartRepository.delete(cartRepository.findByCustomerId(checkOutInvoice.getCustomer().getCustomerAccount().getUsername()));
+            Cart c =  cartRepository.findByCustomerId((checkOutInvoice.getCustomer().getCustomerAccount().getUsername()));
+            if(c != null)
+                cartRepository.delete(c);
             invoiceServiceImpl.createInvoice(checkOutInvoice);
-            mailService.sendMailWithAttachment(checkOutInvoice.getCustomer().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","src/main/resources/templates/Hoadon.docx");
+            mailService.sendMailWithAttachment(checkOutInvoice.getCustomer().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","/app/output/Hoadon.pdf");
         }
         else {
             checkOutInvoice.setInvoice_status(InvoiceStatus.CANCELLED);

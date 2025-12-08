@@ -138,7 +138,11 @@ public class AuthServiceImpl  implements AuthService {
                 .username(registerRequestDTO.getUsername())
                 .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
                 .build();
-        log.info(registerRequestDTO.getPassword());
+        Account checkExists = accountRepository.findByUsername(registerRequestDTO.getUsername()).orElseThrow();
+        if(checkExists.getPassword() != null)
+        {
+            return -1;
+        }
         Customer c = Customer.builder()
                 .email(registerRequestDTO.getEmail())
                 .phone(registerRequestDTO.getPhone())
@@ -149,7 +153,6 @@ public class AuthServiceImpl  implements AuthService {
                 .gender(registerRequestDTO.getGender())
                 .customerAccount(a)
                 .build();
-
         a.setCustomer(c);
 
         Customer customer = customerRepository.save(c);
@@ -167,13 +170,6 @@ public class AuthServiceImpl  implements AuthService {
                 token = token.substring(7);
             }
             SignedJWT jwt = SignedJWT.parse(token);
-//            var signToken = verifyToken(request.getToken(), true);
-//            //Lấy body
-//            String jit = signToken.getJWTClaimsSet().getJWTID();
-//
-//            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
-
-//            log.info("DATETIME: {}", expiryTime.toInstant());
 
             invalidTokenRepsitory.save(InvalidToken.builder()
                     .token_id(token)

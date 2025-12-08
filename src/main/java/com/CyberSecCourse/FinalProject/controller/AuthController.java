@@ -12,6 +12,7 @@ import com.CyberSecCourse.FinalProject.entity.Customer;
 import com.CyberSecCourse.FinalProject.repository.CustomerRepository;
 import com.CyberSecCourse.FinalProject.service.AuthService;
 import com.CyberSecCourse.FinalProject.service.impl.AuthServiceImpl;
+import com.CyberSecCourse.FinalProject.utils.HttpStatusCustom;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -80,6 +81,10 @@ public class AuthController {
         try{
             System.out.println(registerRequestDTO.getPassword());;
             Long result = authService.registerCustomer(registerRequestDTO);
+            if(result == -1)
+            {
+                return new ResponseError(HttpStatusCustom.USERNAME_EXISTS.value(), HttpStatusCustom.USERNAME_EXISTS.reason());
+            }
             return new ResponseData<>(HttpStatus.OK.value(),"Customer Register Done!",result);
         }
         catch (Exception e)

@@ -60,7 +60,7 @@ public class OrderController {
             int price = requestBody.getPrice();
             var productRequestDTO = requestBody.getProductRequestDTO();
 
-            // Gen order code (ví dụ như trước)
+            // Gen order code
             String currentTimeString = String.valueOf(new Date().getTime());
             long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
 

@@ -33,8 +33,12 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     protected String SECRET_KEY;
 
+    @Value("${frontend.url}")
+    protected String FRONTEND_URL;
+
+
     public static final  String[] PUBLIC_ENDPOINTS = {"/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**"
-            ,"/auth/token","/auth/login", "/auth/introspect", "/auth/register",  "/auth/logout", "/product/**", "/discount/get-discount" , "/brand/**" , "/category/**"};
+            ,"/auth/token","/auth/login", "/auth/introspect", "/auth/register",  "/auth/logout", "/product/**", "/discount/get-discount" , "/brand/**" , "/category/**","/Order/webhook" ,"/payment/**"};
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws  Exception{
 
@@ -77,7 +81,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:5500"));
+        config.setAllowedOrigins(List.of(FRONTEND_URL,"http://localhost:5500"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
