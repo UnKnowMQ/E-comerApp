@@ -11,7 +11,8 @@
 	<groupId>com.CyberSecCourse</groupId>
 	<artifactId>FinalProject</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>FinalProject</name>
+    <packaging>pom</packaging>
+    <name>FinalProject</name>
 	<description>Final project for CyberSecurity course</description>
 	<url/>
 	<licenses>
@@ -20,6 +21,14 @@
 	<developers>
 		<developer/>
 	</developers>
+
+	<modules>
+		<module>ApiGateway</module>
+		<module>billing-service</module>
+		<module>auth-service</module>
+
+	</modules>
+
 	<scm>
 		<connection/>
 		<developerConnection/>
@@ -130,9 +139,8 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
-
-
 	</dependencies>
+
 
 	<build>
 		<plugins>

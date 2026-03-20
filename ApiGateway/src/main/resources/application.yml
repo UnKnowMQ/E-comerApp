@@ -1,0 +1,21 @@
+server:
+  port: 8099
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: billing
+          uri: http://localhost:8081
+          predicates:
+            - Path=/billing/**
+          filters:
+            - StripPrefix=1
+        - id: products
+          uri: http://localhost:8082
+          predicates:
+            - Path=/products/**
+          filters:
+            - StripPrefix=1

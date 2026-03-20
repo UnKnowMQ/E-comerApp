@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: billing-service
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+openapi:
+  service:
+    api-docs: api-service
+    serverUrl: http://localhost:8081
+    serverName: Server Dev
+    title: API Document
+    version: 1.0.0
