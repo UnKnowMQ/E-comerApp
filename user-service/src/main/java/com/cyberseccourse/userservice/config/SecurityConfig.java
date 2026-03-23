@@ -1,6 +1,5 @@
 package com.cyberseccourse.userservice.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -14,13 +13,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
-
-    @Value("${jwt.signerKey}")
-    protected String SECRET_KEY;
-
-    @Value("${frontend.url}")
-    protected String FRONTEND_URL;
-
 
     public static final  String[] PUBLIC_ENDPOINTS = {"/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**"};
     @Bean
