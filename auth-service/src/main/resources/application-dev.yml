@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/ecom_userservice_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/ecom_authservice_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
     username: root
     password: Quan2004@
   jpa:

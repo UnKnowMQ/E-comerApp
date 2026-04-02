@@ -9,14 +9,13 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
-@Table(name = "account")
+@Table(name = "accounts")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
-
 
     @Id
     @Column(name = "username", length = 50,nullable = false)
@@ -33,8 +32,6 @@ public class Account {
 
     @Column(name = "user_role")
     private Integer userId;
-
-
 
 
 }

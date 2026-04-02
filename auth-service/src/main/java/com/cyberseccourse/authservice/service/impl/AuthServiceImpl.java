@@ -7,8 +7,10 @@ import com.cyberseccourse.authservice.dto.response.AuthResponse;
 import com.cyberseccourse.authservice.dto.response.IntrospectiveResponse;
 import com.cyberseccourse.authservice.entity.Account;
 import com.cyberseccourse.authservice.entity.InvalidToken;
+import com.cyberseccourse.authservice.entity.RefreshTokens;
 import com.cyberseccourse.authservice.repository.AccountRepository;
 import com.cyberseccourse.authservice.repository.InvalidTokenRepsitory;
+import com.cyberseccourse.authservice.repository.RefreshTokensRepsitory;
 import com.cyberseccourse.authservice.service.AuthService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -38,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private  final InvalidTokenRepsitory invalidTokenRepsitory;
+    private  final RefreshTokensRepsitory refreshTokensRepsitory;
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -76,9 +78,9 @@ public class AuthServiceImpl implements AuthService {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .claim("scope",role)
                 .subject(account.getUsername())
-                .claim("fullname",account.getCustomer().getFirstName() + " "+ account.getCustomer().getLastName())
-                .claim("customerId",account.getCustomer().getCustomerId())
-                .issuer("HlpcStore.com")
+                .claim("username",account.getUsername()
+                .claim("roles",account.getRole())
+                .issuer(".com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .build();
@@ -102,11 +104,11 @@ public class AuthServiceImpl implements AuthService {
 
         if(token == null)
             return IntrospectiveResponse.builder().isValid(false).build();
-        boolean checkInvalid = (invalidTokenRepsitory.findById(token) == null) ? false : true;
+        boolean checkInvalid = (refreshTokensRepsitory.findById(token) == null) ? false : true;
         System.out.println(checkInvalid);
         JWSVerifier verifier  = new MACVerifier(SIGNER_KEY.getBytes());
-        Optional<InvalidToken> itokens =  invalidTokenRepsitory.findById(token);
-        InvalidToken invalidToken = itokens.orElse(null);
+        Optional<RefreshTokens> itokens =  refreshTokensRepsitory.findById(token);
+        RefreshTokens invalidToken = itokens.orElse(null);
         SignedJWT jwt =  SignedJWT.parse(token);
         var verifired = jwt.verify(verifier);
 
@@ -153,8 +155,8 @@ public class AuthServiceImpl implements AuthService {
             }
             SignedJWT jwt = SignedJWT.parse(token);
 
-            invalidTokenRepsitory.save(InvalidToken.builder()
-                    .token_id(token)
+            refreshTokensRepsitory.save(RefreshTokens.builder()
+                    .token(token)
                     .expired_at(jwt.getJWTClaimsSet().getExpirationTime().toInstant())
                     .build());
             return true;
