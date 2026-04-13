@@ -1,10 +1,7 @@
 package com.CyberSecCourse.FinalProject.dto.request;
 
-import com.CyberSecCourse.FinalProject.entity.Administrator;
 import com.CyberSecCourse.FinalProject.entity.Customer;
-import com.CyberSecCourse.FinalProject.entity.Manager;
 import com.CyberSecCourse.FinalProject.utils.AccountStatus;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;

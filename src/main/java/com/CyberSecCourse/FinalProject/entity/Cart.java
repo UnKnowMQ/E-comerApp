@@ -34,7 +34,7 @@ public class Cart {
     @ManyToOne
     @JoinColumn(name = "c_id")
     @JsonIgnore
-    private Customer customer;
+    private User user;
 
     @OneToMany(mappedBy = "cart")
     @ToString.Exclude

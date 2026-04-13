@@ -32,7 +32,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     private final ProductRepository productRepository;
 
-    private final CustomerRepository customerRepository;
+    private final UserRepository customerRepository;
 
     private final CartItemRepository cartItemRepository;
 
@@ -48,14 +48,14 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public void checkOut1(InvoiceRequest invoiceRequest, ProductRequestDTO productRequestDTO) {
 
-        Optional<Customer> c = customerRepository.findById(invoiceRequest.getCustomerId());
+        Optional<User> c = customerRepository.findById(invoiceRequest.getCustomerId());
 
     //to Invoice
         Invoice invoice  =  Invoice.builder()
                 .invoice_date(invoiceRequest.getInvoice_date())
                 .invoice_status(invoiceRequest.getInvoice_status())
                 .note(invoiceRequest.getNote())
-                .customer(c.orElseThrow())
+                .user(c.orElseThrow())
                 .order_code(invoiceRequest.getOrder_code())
                 .total_amount(invoiceRequest.getTotal_amount())
                 .exprired_at(invoiceRequest.getExpired_at())
@@ -68,12 +68,12 @@ public class CheckoutServiceImpl implements CheckoutService {
         // from cartItem to InvoiceDetail
         if(productRequestDTO.getProductName() == null)
         {
-            List<CartItem> cartItems =  cartItemRepository.findCartItemByCustomerId(c.get().getCustomerId());
+            List<CartItem> cartItems =  cartItemRepository.findCartItemByCustomerId(c.get().getUserId());
             cartItems.forEach(cartItem -> {
                 cartItemToInvoiceDetail(cartItem, invoice);
             });
 
-            cartRepository.findByCustomerId(c.get().getCustomerAccount().getUsername()).setCartStatus("PROCESSTOCHECKOUT");
+            cartRepository.findByCustomerId(c.get().getUsername()).setCartStatus("PROCESSTOCHECKOUT");
 
 
         }

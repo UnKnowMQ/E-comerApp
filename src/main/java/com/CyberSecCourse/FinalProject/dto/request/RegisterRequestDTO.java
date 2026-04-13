@@ -1,8 +1,7 @@
 package com.CyberSecCourse.FinalProject.dto.request;
 
 import com.CyberSecCourse.FinalProject.entity.Account;
-import com.CyberSecCourse.FinalProject.entity.Administrator;
-import com.CyberSecCourse.FinalProject.entity.Customer;
+import com.CyberSecCourse.FinalProject.entity.User;
 import com.CyberSecCourse.FinalProject.utils.AccountStatus;
 import lombok.*;
 
@@ -33,7 +32,7 @@ public class RegisterRequestDTO implements Serializable {
 
     private AccountStatus status;
 
-    private Customer customer ;
+    private User user ;
 
     private Instant createdAt;
 

@@ -1,0 +1,59 @@
+package com.CyberSecCourse.FinalProject.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "shops")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Shop {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shop_id")
+    private Integer shopId;
+
+    @Column(name = "shop_name", nullable = false, length = 255)
+    private String shopName;
+
+    @Column(name = "user_id")
+    private Integer userId;
+
+    @Column(name = "logo", length = 255)
+    private String logo;
+
+    @Column(name = "banner", length = 255)
+    private String banner;
+
+    @Column(name = "rating")
+    private Double rating;
+
+    @Column(name = "total_products")
+    private Long totalProducts;
+
+    @Column(name = "total_followers")
+    private Long totalFollowers;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "verified")
+    private Boolean verified;
+
+    @Column(name = "created_at")
+    private LocalDate createdAt;
+
+    @Column(name = "update_at")
+    private LocalDate updateAt;
+
+    @Column(name = "business_type", length = 255)
+    private String businessType;
+
+    @Column(name = "business_verification", nullable = false, length = 255)
+    private String businessVerification;
+}

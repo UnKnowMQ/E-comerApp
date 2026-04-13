@@ -8,8 +8,6 @@ import com.CyberSecCourse.FinalProject.dto.response.AuthResponse;
 import com.CyberSecCourse.FinalProject.dto.response.IntrospectiveResponse;
 import com.CyberSecCourse.FinalProject.dto.response.ResponseData;
 import com.CyberSecCourse.FinalProject.dto.response.ResponseError;
-import com.CyberSecCourse.FinalProject.entity.Customer;
-import com.CyberSecCourse.FinalProject.repository.CustomerRepository;
 import com.CyberSecCourse.FinalProject.service.AuthService;
 import com.CyberSecCourse.FinalProject.service.impl.AuthServiceImpl;
 import com.CyberSecCourse.FinalProject.utils.HttpStatusCustom;

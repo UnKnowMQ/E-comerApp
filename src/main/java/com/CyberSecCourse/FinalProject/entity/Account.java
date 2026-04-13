@@ -19,26 +19,17 @@ public class Account {
 
 
     @Id
-    @Column(name = "username", length = 50,nullable = false)
-    private String username;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Integer userId;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @Column(name = "status")
-    private AccountStatus status;
+    @Column(name = "status", nullable = false, length = 10)
+    private String status;
 
-    @JoinColumn(name = "administratoradmin_id")
-    @OneToOne(fetch = FetchType.EAGER)
-    private Administrator administrator;
-
-    @JoinColumn(name = "customerc_id")
-    @OneToOne(fetch = FetchType.EAGER)
-    private Customer customer ;
-
-    @JoinColumn(name = "managermanager_id")
-    @OneToOne(fetch = FetchType.EAGER)
-    private Manager manager;
-
+    @Column(name = "email", length = 60)
+    private String email;
 
 }

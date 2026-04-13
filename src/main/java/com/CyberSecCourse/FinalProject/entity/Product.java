@@ -11,6 +11,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -27,51 +28,54 @@ public class Product{
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "product_id")
+    @Column(name = "product_id", nullable = false, unique = true, length = 255)
     private String productId;
 
-    @Column(name = "product_name")
+    @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
-    @Column(name = "slug")
-    private String slug;
-
-    @Column(name = "price")
-    private BigDecimal price;
-
-    @Column(name = "quantity")
-    private Integer quantity;
-
-    @Column(name = "warranty")
-    private String warranty;
-
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private ProductStatus status;
-
-    @Column(name = "updated_at")
-    private Instant updated_at;
-
-    @Column(name = "created_at")
-    private Instant created_at;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "brand_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
     private Brand brand;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "discount_id")
-    @JsonIgnore
-    private Discount discount;
+    @Column(name = "slug", nullable = false, length = 255)
+    private String slug;
+
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "specs", nullable = false, columnDefinition = "TEXT")
+    private String specs;
+
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
+
+    @Column(name = "warranty", nullable = false, length = 255)
+    private String warranty;
+
+    // Note: typo "satus" preserved from original schema
+    @Column(name = "satus", nullable = false, length = 50)
+    private String status;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDate updatedAt;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDate createdAt;
+
+    @Column(name = "sale_volume")
+    private Integer saleVolume;
 
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
     @JsonIgnore
     private Set<Image> images;
-
 
 }

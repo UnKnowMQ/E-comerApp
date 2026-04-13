@@ -17,14 +17,17 @@ public class Image {
     @Column(name = "image_id")
     private Integer imageId;
 
-    @Column(name = "image_name")
+    @Column(name = "url", nullable = false, length = 255)
+    private String url;
+
+    @Column(name = "image_name", nullable = false, length = 255)
     private String imageName;
 
-    @Column(name = "url")
-    private String imageUrl;
-
-    @JoinColumn(name = "productid")
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "productid", nullable = false)
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ratingid")
+    private Rating rating;
 }
