@@ -110,12 +110,12 @@ public class CheckoutServiceImpl implements CheckoutService {
         if("success".equalsIgnoreCase(status))
         {
             checkOutInvoice.setInvoice_status(InvoiceStatus.SHIPPING);
-            cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getCustomer().getCustomerId()));
-            Cart c =  cartRepository.findByCustomerId((checkOutInvoice.getCustomer().getCustomerAccount().getUsername()));
+            cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getUser().getUserId()));
+            Cart c =  cartRepository.findByCustomerId((checkOutInvoice.getUser().getUsername()));
             if(c != null)
                 cartRepository.delete(c);
             invoiceServiceImpl.createInvoice(checkOutInvoice);
-            mailService.sendMailWithAttachment(checkOutInvoice.getCustomer().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","/app/output/Hoadon.pdf");
+            mailService.sendMailWithAttachment(checkOutInvoice.getUser().getEmail(),"Hoá đơn của bạn","Xin chào, vui lòng xem hóa đơn trong file đính kèm.","/app/output/Hoadon.pdf");
         }
         else {
             checkOutInvoice.setInvoice_status(InvoiceStatus.CANCELLED);

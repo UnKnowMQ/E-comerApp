@@ -32,7 +32,7 @@ public class RegisterRequestDTO implements Serializable {
 
     private AccountStatus status;
 
-    private User user ;
+    private User use;
 
     private Instant createdAt;
 
@@ -40,6 +40,4 @@ public class RegisterRequestDTO implements Serializable {
 
     private LocalDate date_of_birth;
 
-    @ToString.Exclude
-    private Account customerAccount;
 }

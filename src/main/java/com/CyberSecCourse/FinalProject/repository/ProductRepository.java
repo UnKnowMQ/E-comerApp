@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    @Query("Select i.imageUrl from Image i where i.product.id = :productId ")
+    @Query("Select i.url from Image i where i.product.id = :productId ")
     List<String> getImageByProductId(int productId);
 
     @Query("Select new com.CyberSecCourse.FinalProject.dto.response.ProductTopResponse(p.id,p.price, sum(id.quantity), p.productName) from Product p" +

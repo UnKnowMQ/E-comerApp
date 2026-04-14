@@ -1,6 +1,5 @@
 package com.CyberSecCourse.FinalProject.dto.request;
 
-import com.CyberSecCourse.FinalProject.entity.Customer;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;

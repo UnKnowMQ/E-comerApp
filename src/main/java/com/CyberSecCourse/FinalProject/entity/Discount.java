@@ -31,8 +31,8 @@ public class Discount {
     @Column(name = "parent_id")
     private Integer discount_value ;
 
-    @Column(name = "limit")
-    private Integer limit ;
+    @Column(name = "usage_limit")
+    private Integer usageLimit ;
 
     @Column(name = "start_date")
     private Instant start_date;
@@ -40,15 +40,7 @@ public class Discount {
     @Column(name = "end_date")
     private Instant end_date;
 
-
     @Column(name = "type")
     private String discount_type;
-
-    @ToString.Exclude
-    @OneToMany(mappedBy = "discount")
-    @JsonIgnore
-    private Set<Product> products = new HashSet<>();
-
-
 
 }

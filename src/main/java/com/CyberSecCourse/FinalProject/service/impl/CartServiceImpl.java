@@ -6,8 +6,8 @@ import com.CyberSecCourse.FinalProject.entity.*;
 import com.CyberSecCourse.FinalProject.mapped.ProductMapper;
 import com.CyberSecCourse.FinalProject.repository.CartItemRepository;
 import com.CyberSecCourse.FinalProject.repository.CartRepository;
-import com.CyberSecCourse.FinalProject.repository.CustomerRepository;
 import com.CyberSecCourse.FinalProject.repository.ProductRepository;
+import com.CyberSecCourse.FinalProject.repository.UserRepository;
 import com.CyberSecCourse.FinalProject.service.CartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,14 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
 
-    private  final CustomerRepository customerRepository;
+    private  final UserRepository customerRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
 
     @Override
     public boolean createCart(Integer productId, String username) {
-        Customer customer = customerRepository.findByUsername(username);
+        User customer = customerRepository.findByUsername(username);
 
         Product product = productRepository.findById(productId).orElseThrow();
 
@@ -39,7 +39,7 @@ public class CartServiceImpl implements CartService {
             Cart newCart = Cart.builder()
                     .createdAt(Instant.now())
                     .updateAt(Instant.now())
-                    .customer(customer)
+                    .user(customer)
                     .build();
 
             cartRepository.save(newCart);

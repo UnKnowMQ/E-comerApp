@@ -8,6 +8,7 @@ import com.CyberSecCourse.FinalProject.mapped.ProductMapper;
 import com.CyberSecCourse.FinalProject.repository.ProductRepository;
 import com.CyberSecCourse.FinalProject.repository.SearchRepository;
 import com.CyberSecCourse.FinalProject.service.ProductService;
+import com.CyberSecCourse.FinalProject.utils.ProductStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,14 +53,14 @@ public class ProductServiceImpl implements ProductService {
                 .price(product.getPrice())
                 .slug(product.getSlug())
                 .category_name(product.getCategory() == null ? "" : product.getCategory().getCategory_name())
-                .discount_name(product.getDiscount() == null ? "" : product.getDiscount().getDiscount_name())
+//                .discount_name(product.getDiscount() == null ? "" : product.getDiscount().getDiscount_name())
                 .quantity(product.getQuantity())
                 .warranty(product.getWarranty())
-                .status(product.getStatus())
+                .status(ProductStatus.valueOf(product.getStatus()))
                 .imageUrl(
                         product.getImages().stream()
                                 .findFirst()
-                                .map(img -> img.getImageUrl())
+                                .map(img -> img.getUrl())
                                 .orElse(null)
                 )
 

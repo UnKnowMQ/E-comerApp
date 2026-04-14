@@ -75,7 +75,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseData<Long> login(@RequestBody RegisterRequestDTO registerRequestDTO) {
+    public ResponseData<Long> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
         try{
             System.out.println(registerRequestDTO.getPassword());;
             Long result = authService.registerCustomer(registerRequestDTO);

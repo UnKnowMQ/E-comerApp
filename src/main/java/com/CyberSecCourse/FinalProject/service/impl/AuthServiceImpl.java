@@ -4,11 +4,11 @@ import com.CyberSecCourse.FinalProject.dto.request.*;
 import com.CyberSecCourse.FinalProject.dto.response.AuthResponse;
 import com.CyberSecCourse.FinalProject.dto.response.IntrospectiveResponse;
 import com.CyberSecCourse.FinalProject.entity.Account;
-import com.CyberSecCourse.FinalProject.entity.Customer;
-import com.CyberSecCourse.FinalProject.entity.InvalidToken;
+import com.CyberSecCourse.FinalProject.entity.RefreshToken;
+import com.CyberSecCourse.FinalProject.entity.User;
 import com.CyberSecCourse.FinalProject.repository.AccountRepository;
-import com.CyberSecCourse.FinalProject.repository.CustomerRepository;
-import com.CyberSecCourse.FinalProject.repository.InvalidTokenRepsitory;
+import com.CyberSecCourse.FinalProject.repository.RefreshTokenRepsitory;
+import com.CyberSecCourse.FinalProject.repository.UserRepository;
 import com.CyberSecCourse.FinalProject.service.AuthService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -27,6 +27,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,16 +43,17 @@ public class AuthServiceImpl  implements AuthService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private final CustomerRepository customerRepository;
+    private final UserRepository customerRepository;
 
-    private  final InvalidTokenRepsitory invalidTokenRepsitory;
+    private final RefreshTokenRepsitory refreshTokenRepsitory;
+
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
     @Override
     public AuthResponse isAuthenticated(AuthRequestDTO authRequestDTO) {
-        var account = accountRepository.findByUsername(authRequestDTO.getUsername()).orElseThrow();
+        var account = accountRepository.findByEmail(authRequestDTO.getEmail()).orElseThrow();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isAuth = passwordEncoder.matches(authRequestDTO.getPassword(), account.getPassword());
         if(!isAuth)
@@ -70,19 +74,17 @@ public class AuthServiceImpl  implements AuthService {
     @Override
     public String generateToken(Account account) {
         JWSHeader  jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
-        String role;
-        if(account.getCustomer().getCustomerId() != null)
-            role = "Customer";
-        else
-            role = account.getManager().getManager_id()!= null ? "Manager" : "Administrator";
+        String role ;
+        User user = customerRepository.getReferenceById(account.getUserId());
+       role  = user.getRole();
 
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .claim("scope",role)
-                .subject(account.getUsername())
-                .claim("fullname",account.getCustomer().getFirstName() + " "+ account.getCustomer().getLastName())
-                .claim("customerId",account.getCustomer().getCustomerId())
-                .issuer("HlpcStore.com")
+                .subject(account.getEmail())
+//                .claim("fullname",account.getCustomer().getFirstName() + " "+ account.getCustomer().getLastName())
+//                .claim("customerId",account.getCustomer().getCustomerId())
+                .issuer("Eshop.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .build();
@@ -93,6 +95,10 @@ public class AuthServiceImpl  implements AuthService {
 
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            refreshTokenRepsitory.save(RefreshToken
+                    .builder()
+                    .token(jwsObject.serialize()).userId(account.getUserId()).expiredAt(LocalDateTime.now().plusDays(7)).revoked(false)
+                    .build());
             return jwsObject.serialize();
         }catch (Exception e)
         {
@@ -106,18 +112,19 @@ public class AuthServiceImpl  implements AuthService {
 
         if(token == null)
             return IntrospectiveResponse.builder().isValid(false).build();
-        boolean checkInvalid = (invalidTokenRepsitory.findById(token) == null) ? false : true;
+
+        boolean checkInvalid = (refreshTokenRepsitory.findByToken(token) == null) ? false : true;
         System.out.println(checkInvalid);
         JWSVerifier verifier  = new MACVerifier(SIGNER_KEY.getBytes());
-        Optional<InvalidToken> itokens =  invalidTokenRepsitory.findById(token);
-        InvalidToken invalidToken = itokens.orElse(null);
+        Optional<RefreshToken> itokens = Optional.ofNullable(refreshTokenRepsitory.findByToken(token));
+        RefreshToken invalidToken = itokens.orElse(null);
         SignedJWT jwt =  SignedJWT.parse(token);
         var verifired = jwt.verify(verifier);
 
         Date exprirationTime = jwt.getJWTClaimsSet().getExpirationTime();
         boolean checkDate = false;
         if (invalidToken != null) {
-            checkDate = invalidToken.getExpired_at().equals(exprirationTime.toInstant());
+            checkDate = invalidToken.getExpiredAt().equals(exprirationTime.toInstant());
         }
 
         checkInvalid = checkDate && checkInvalid;
@@ -125,40 +132,42 @@ public class AuthServiceImpl  implements AuthService {
 
         return IntrospectiveResponse.builder()
                 .isValid(verifired && exprirationTime.after(new Date()) && !checkInvalid)
-                .fullName((String) jwt.getJWTClaimsSet().getClaim("fullname"))
-                .userName((String) jwt.getJWTClaimsSet().getSubject())
-                .customerId( Math.toIntExact((Long) jwt.getJWTClaimsSet().getClaim("customerId")) )
+                .fullName((String) jwt.getJWTClaimsSet().getClaim("email"))
                 .build();
     }
 
     @Override
     public long registerCustomer(RegisterRequestDTO registerRequestDTO) {
 
-        Account a = Account.builder()
-                .username(registerRequestDTO.getUsername())
-                .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
-                .build();
-        Account checkExists = accountRepository.findByUsername(registerRequestDTO.getUsername()).orElseThrow();
-        if(checkExists.getPassword() != null)
+        if(accountRepository.findByEmail(registerRequestDTO.getEmail()).isPresent())
         {
-            return -1;
+            throw new RuntimeException("Email is used");
         }
-        Customer c = Customer.builder()
+
+        Account a = Account.builder()
                 .email(registerRequestDTO.getEmail())
-                .phone(registerRequestDTO.getPhone())
-                .createdAt(new Date().toInstant())
-                .date_of_birth(registerRequestDTO.getDate_of_birth())
-                .firstName(registerRequestDTO.getFirstName())
-                .lastName(registerRequestDTO.getLastName())
-                .gender(registerRequestDTO.getGender())
-                .customerAccount(a)
+                .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
+                .status("Active")
                 .build();
-        a.setCustomer(c);
 
-        Customer customer = customerRepository.save(c);
+        User c = User.builder()
+                .email(registerRequestDTO.getEmail())
+                .phoneNumber(registerRequestDTO.getPhone())
+                .createdAt(LocalDate.now())
+                .dateOfBirth(registerRequestDTO.getDate_of_birth())
+                .firstname(registerRequestDTO.getFirstName())
+                .lastname(registerRequestDTO.getLastName())
+                .gender(registerRequestDTO.getGender())
+                .role("Customer")
+                .address(null).status("Active").note(null).username(registerRequestDTO.getUsername()).avatar(null)
+                .build();
+        a.setUserId(c.getUserId());
 
+        User customer = customerRepository.save(c);
 
-        return c.getCustomerId();
+        accountRepository.save(a);
+
+        return customer.getUserId();
     }
 
     @Override
@@ -171,9 +180,9 @@ public class AuthServiceImpl  implements AuthService {
             }
             SignedJWT jwt = SignedJWT.parse(token);
 
-            invalidTokenRepsitory.save(InvalidToken.builder()
-                    .token_id(token)
-                    .expired_at(jwt.getJWTClaimsSet().getExpirationTime().toInstant())
+            refreshTokenRepsitory.save(RefreshToken.builder()
+                    .token(token)
+                    .expiredAt(LocalDateTime.ofInstant(jwt.getJWTClaimsSet().getExpirationTime().toInstant(), ZoneId.systemDefault()))
                     .build());
             return true;
         } catch (Exception e){

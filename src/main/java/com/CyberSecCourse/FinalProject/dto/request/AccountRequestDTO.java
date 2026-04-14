@@ -1,8 +1,8 @@
 package com.CyberSecCourse.FinalProject.dto.request;
 
-import com.CyberSecCourse.FinalProject.entity.Customer;
 import com.CyberSecCourse.FinalProject.utils.AccountStatus;
 import lombok.*;
+import org.apache.catalina.Manager;
 
 import java.io.Serializable;
 
@@ -14,17 +14,12 @@ import java.io.Serializable;
 
 public class AccountRequestDTO implements Serializable {
 
-
     private String username;
 
     private String password;
 
     private AccountStatus status;
 
-    private Administrator administrator;
-
-    private Customer customer ;
-
-    private Manager manager;
+    private String email;
 
 }

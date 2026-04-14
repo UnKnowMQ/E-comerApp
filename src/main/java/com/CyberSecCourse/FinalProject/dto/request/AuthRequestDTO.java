@@ -11,6 +11,6 @@ import java.io.Serializable;
 @Setter
 @Builder
 public class AuthRequestDTO  implements Serializable {
-    String username;
+    String email;
     String password;
 }

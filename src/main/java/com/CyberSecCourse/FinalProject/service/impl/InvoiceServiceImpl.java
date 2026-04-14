@@ -43,11 +43,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         Map<String, String> placeholders = new HashMap<>();
         BigDecimal tax = invoice.getTotal_amount().divide(BigDecimal.valueOf(10));
-        String fullname = invoice.getCustomer().getFirstName() + " " + invoice.getCustomer().getLastName();
+        String fullname = invoice.getUser().getFirstname() + " " + invoice.getUser().getLastname();
 
         placeholders.put("id", invoice.getInvoice_id().toString());
         placeholders.put("fullname", fullname);
-        placeholders.put("phone", invoice.getCustomer().getPhone());
+        placeholders.put("phone", invoice.getUser().getPhoneNumber());
         placeholders.put("address", invoice.getShipping_address());
         placeholders.put("description", invoice.getNote());
         placeholders.put("datetime", invoice.getInvoice_date().toString());

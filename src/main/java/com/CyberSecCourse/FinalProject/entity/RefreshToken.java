@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "refresh_token")
@@ -27,7 +28,7 @@ public class RefreshToken {
     private Integer userId;
 
     @Column(name = "expired_at")
-    private LocalDate expiredAt;
+    private LocalDateTime expiredAt;
 
     @Column(name = "revoked")
     private Boolean revoked;
