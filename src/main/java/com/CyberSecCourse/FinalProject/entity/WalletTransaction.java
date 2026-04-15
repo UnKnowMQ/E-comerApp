@@ -3,7 +3,9 @@ package com.CyberSecCourse.FinalProject.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "wallet_transaction")
@@ -24,15 +26,15 @@ public class WalletTransaction {
     private Wallet wallet;
 
     @Column(name = "amount")
-    private Integer amount;
+    private BigDecimal amount;
 
     // Note: schema uses INT for type, consider using an Enum or String in practice
     @Column(name = "type")
-    private Integer type;
+    private String type;
 
     @Column(name = "status", length = 255)
     private String status;
 
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 }

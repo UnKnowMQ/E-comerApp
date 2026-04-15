@@ -3,6 +3,8 @@ package com.CyberSecCourse.FinalProject.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "wallets")
 @Getter
@@ -21,7 +23,7 @@ public class Wallet {
     private Integer userId;
 
     @Column(name = "balance")
-    private Integer balance;
+    private BigDecimal balance;
 
     @Column(name = "status", length = 255)
     private String status;
