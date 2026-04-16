@@ -1,10 +1,12 @@
 package com.CyberSecCourse.FinalProject.service;
 
 import com.CyberSecCourse.FinalProject.entity.Wallet;
+import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
 
 import java.math.BigDecimal;
 
 public interface WalletService {
 
-    Wallet depositCreating(Long UserId, BigDecimal amount);
+    WalletTransaction depositCreating(Long UserId, BigDecimal amount);
+    WalletTransaction depositProcessing(Long UserId, BigDecimal amount,String transactionResult, WalletTransaction transaction);
 }

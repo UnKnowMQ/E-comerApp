@@ -37,4 +37,7 @@ public class WalletTransaction {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "order_code")
+    private Long orderCode;
 }

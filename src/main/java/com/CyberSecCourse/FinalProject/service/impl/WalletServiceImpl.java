@@ -21,8 +21,10 @@ public class WalletServiceImpl implements WalletService {
     private final WalletTransactionRepository walletTransactionRepository;
 
 
+
+
     @Override
-    public Wallet depositCreating(Long UserId, BigDecimal amount) {
+    public WalletTransaction depositCreating(Long UserId, BigDecimal amount, Long orderCode) {
         if (amount.compareTo(BigDecimal.ZERO) <=0 )
         {
             throw new IllegalArgumentException("Amount must greater than 0");
@@ -39,13 +41,33 @@ public class WalletServiceImpl implements WalletService {
                 .wallet(wallet)
                 .amount(amount)
                 .type("DEPOSIT")
-                .status("SUCCESS")
+                .status("PENDING")
                 .createdAt(LocalDateTime.now())
+                .orderCode(orderCode)
                 .build();
         walletTransactionRepository.save(walletTransaction);
 
-
-
-        return null;
+        return walletTransaction;
     }
+
+    @Override
+    public WalletTransaction depositProcessing(Long UserId, BigDecimal amount, String transactionResult, WalletTransaction transaction) {
+
+        Wallet wallet = walletRepository.findByUserId(UserId);
+
+        if(transactionResult.equals("PAID"))
+        {
+            transaction.setStatus("SUCCESS");
+            walletTransactionRepository.save(transaction);
+            return transaction;
+        }
+        // rollback
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        walletRepository.save(wallet);
+
+        transaction.setStatus(transactionResult);
+        walletTransactionRepository.save(transaction);
+        return transaction;
+    }
+
 }

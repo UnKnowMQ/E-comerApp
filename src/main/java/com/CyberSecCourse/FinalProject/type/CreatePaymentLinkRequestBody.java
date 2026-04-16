@@ -16,9 +16,8 @@ public class CreatePaymentLinkRequestBody {
     private String productName;
     private String username;
     private String description;
+    private Long userId;
     private String returnUrl;
     private int price;
     private String cancelUrl;
-    private InvoiceRequest invoiceRequest;
-    private ProductRequestDTO productRequestDTO;
 }

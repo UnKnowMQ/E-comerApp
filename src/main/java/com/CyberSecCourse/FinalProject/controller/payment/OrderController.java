@@ -8,6 +8,7 @@ import com.CyberSecCourse.FinalProject.dto.response.ResponseData;
 import com.CyberSecCourse.FinalProject.service.CartService;
 import com.CyberSecCourse.FinalProject.service.impl.CartServiceImpl;
 import com.CyberSecCourse.FinalProject.service.impl.CheckoutServiceImpl;
+import com.CyberSecCourse.FinalProject.service.impl.WalletServiceImpl;
 import com.CyberSecCourse.FinalProject.type.CreatePaymentLinkRequestBody;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +29,7 @@ import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
 import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,19 +48,24 @@ public class OrderController {
 
     private final CartServiceImpl cartService;
 
+    private final WalletServiceImpl walletService;
+
+    private
+
     @PostMapping("/create")
     public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody requestBody) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
 
         try {
-            String productName = requestBody.getProductName();
-            String username = requestBody.getUsername();
+//            String productName = requestBody.getProductName();
+//            String username = requestBody.getUsername();
             String description = requestBody.getDescription();
             String returnUrl = requestBody.getReturnUrl();
             String cancelUrl = requestBody.getCancelUrl();
+            Long userId  = requestBody.getUserId();
             int price = requestBody.getPrice();
-            var productRequestDTO = requestBody.getProductRequestDTO();
+           // var productRequestDTO = requestBody.getProductRequestDTO();
 
             // Gen order code
             String currentTimeString = String.valueOf(new Date().getTime());
@@ -73,40 +80,42 @@ public class OrderController {
                     .returnUrl(returnUrl)
                     .build();
 
-            if (productRequestDTO.getProductName() != null) {
-                // trường hợp 1 item
-                PaymentLinkItem item = PaymentLinkItem.builder()
-                        .name(productRequestDTO.getProductName())
-                        .price(productRequestDTO.getPrice().longValue())
-                        .quantity(1)
-                        .build();
-
-                paymentRequest.setItems(List.of(item));
-            } else {
-                // nhiều item từ cart
-                List<PaymentLinkItem> items = new ArrayList<>();
-                List<CartItemResponse> cartItems = cartService.getCartItemsByCustomer(username);
-                for (CartItemResponse cartItem : cartItems) {
-                    PaymentLinkItem it = PaymentLinkItem.builder()
-                            .name(cartItem.getProductResponse().getProductName())
-                            .price(cartItem.getProductResponse().getPrice().longValue())
-                            .quantity(cartItem.getQuantity())
-                            .build();
-                    items.add(it);
-                }
-                paymentRequest.setItems(items);
-            }
+//            if (productRequestDTO.getProductName() != null) {
+//                // trường hợp 1 item
+//                PaymentLinkItem item = PaymentLinkItem.builder()
+//                        .name(productRequestDTO.getProductName())
+//                        .price(productRequestDTO.getPrice().longValue())
+//                        .quantity(1)
+//                        .build();
+//
+//                paymentRequest.setItems(List.of(item));
+//            } else {
+//                // nhiều item từ cart
+//                List<PaymentLinkItem> items = new ArrayList<>();
+//                List<CartItemResponse> cartItems = cartService.getCartItemsByCustomer(username);
+//                for (CartItemResponse cartItem : cartItems) {
+//                    PaymentLinkItem it = PaymentLinkItem.builder()
+//                            .name(cartItem.getProductResponse().getProductName())
+//                            .price(cartItem.getProductResponse().getPrice().longValue())
+//                            .quantity(cartItem.getQuantity())
+//                            .build();
+//                    items.add(it);
+//                }
+//                paymentRequest.setItems(items);
+//            }
 
             CreatePaymentLinkResponse data = payOS.paymentRequests().create(paymentRequest);
 
             // Lưu invoice pending vào DB
-            InvoiceRequest invoiceRequest = requestBody.getInvoiceRequest();
-            invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
-            invoiceRequest.setOrder_code(orderCode);
-            // expiredAt: SDK v2 có thể không dùng trường expiredAt như cũ, tùy config của bạn
-            invoiceRequest.setExpired_at(Instant.now().plusSeconds(30 * 60));
-
-            checkoutService.checkOut1(invoiceRequest, productRequestDTO);
+//            InvoiceRequest invoiceRequest = requestBody.getInvoiceRequest();
+//            invoiceRequest.setInvoice_status(InvoiceStatus.PENDING);
+//            invoiceRequest.setOrder_code(orderCode);
+//            // expiredAt: SDK v2 có thể không dùng trường expiredAt như cũ, tùy config của bạn
+//            invoiceRequest.setExpired_at(Instant.now().plusSeconds(30 * 60));
+//
+//            checkoutService.checkOut1(invoiceRequest, productRequestDTO);
+//
+            walletService.depositCreating(userId, BigDecimal.valueOf(price),orderCode);
 
             response.put("error", 0);
             response.put("message", "success");
@@ -144,8 +153,9 @@ public class OrderController {
             Long orderCode = data.getOrderCode();
             log.info("ORDER_CODE = {}", orderCode);
 
+            Long userId = walletRepository
             // 3. Cập nhật đơn hàng
-            checkoutService.checkOut2("PAID", orderCode);
+            walletService.depositProcessing()
 
             response.put("error", 0);
             response.put("message", "Webhook processed");
