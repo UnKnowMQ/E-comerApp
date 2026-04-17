@@ -12,4 +12,6 @@ public interface WalletTransactionRepository  extends JpaRepository<WalletTransa
     @Query("Select u.userId from User u, WalletTransaction wt WHERE u.userId =  wt.wallet.userId AND wt.orderCode = :orderCode")
     Long  getUserIdByOrderCode(Long orderCode);
 
+    WalletTransaction findByOrderCode(Long userId);
+
 }

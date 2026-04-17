@@ -5,6 +5,8 @@ import com.CyberSecCourse.FinalProject.dto.request.InvoiceRequest;
 import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
 import com.CyberSecCourse.FinalProject.dto.response.CartItemResponse;
 import com.CyberSecCourse.FinalProject.dto.response.ResponseData;
+import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
+import com.CyberSecCourse.FinalProject.repository.WalletTransactionRepository;
 import com.CyberSecCourse.FinalProject.service.CartService;
 import com.CyberSecCourse.FinalProject.service.impl.CartServiceImpl;
 import com.CyberSecCourse.FinalProject.service.impl.CheckoutServiceImpl;
@@ -50,7 +52,8 @@ public class OrderController {
 
     private final WalletServiceImpl walletService;
 
-    private
+    private final WalletTransactionRepository walletTransactionRepository;
+
 
     @PostMapping("/create")
     public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody requestBody) {
@@ -153,9 +156,11 @@ public class OrderController {
             Long orderCode = data.getOrderCode();
             log.info("ORDER_CODE = {}", orderCode);
 
-            Long userId = walletRepository
+            Long userId = walletTransactionRepository.getUserIdByOrderCode(orderCode);
+            WalletTransaction walletTransaction = walletTransactionRepository.findByOrderCode(orderCode);
+
             // 3. Cập nhật đơn hàng
-            walletService.depositProcessing()
+            walletService.depositProcessing(userId, BigDecimal.valueOf(data.getAmount()),"PAID",walletTransaction);
 
             response.put("error", 0);
             response.put("message", "Webhook processed");

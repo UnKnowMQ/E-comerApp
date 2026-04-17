@@ -7,6 +7,6 @@ import java.math.BigDecimal;
 
 public interface WalletService {
 
-    WalletTransaction depositCreating(Long UserId, BigDecimal amount);
+    WalletTransaction depositCreating(Long UserId, BigDecimal amount, Long orderCode);
     WalletTransaction depositProcessing(Long UserId, BigDecimal amount,String transactionResult, WalletTransaction transaction);
 }
