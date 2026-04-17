@@ -38,7 +38,7 @@ public class SecurityConfig {
 
 
     public static final  String[] PUBLIC_ENDPOINTS = {"/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**"
-            ,"/auth/token","/auth/login", "/auth/introspect", "/auth/register",  "/auth/logout", "/product/**", "/discount/get-discount" , "/brand/**" , "/category/**","/Order/webhook" ,"/payment/**"};
+            ,"/auth/token","/auth/login", "/auth/introspect", "/auth/register",  "/auth/logout", "/product/**", "/discount/get-discount" , "/brand/**" , "/category/**", "/Order/webhook" ,"/payment/**"};
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws  Exception{
 

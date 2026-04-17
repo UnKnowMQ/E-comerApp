@@ -169,7 +169,16 @@ public class OrderController {
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                checkoutService.checkOut2("FAIL",webhookData.getData().getOrderCode());
+                var data = payOS.webhooks().verify(webhookData);
+
+                // 2. Lấy dữ liệu giao dịch
+                Long orderCode = data.getOrderCode();
+                log.info("ORDER_CODE = {}", orderCode);
+
+                Long userId = walletTransactionRepository.getUserIdByOrderCode(orderCode);
+                WalletTransaction walletTransaction = walletTransactionRepository.findByOrderCode(orderCode);
+
+                walletService.depositProcessing(userId, BigDecimal.valueOf(data.getAmount()),"FAIL",walletTransaction);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }

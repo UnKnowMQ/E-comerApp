@@ -25,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -46,6 +47,8 @@ public class AuthServiceImpl  implements AuthService {
     private final UserRepository customerRepository;
 
     private final RefreshTokenRepsitory refreshTokenRepsitory;
+    
+    private final WalletServiceImpl walletService;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -165,8 +168,12 @@ public class AuthServiceImpl  implements AuthService {
 
         User customer = customerRepository.save(c);
 
+        walletService.createWallet(WalletRequestDTO.builder()
+                        .userId(Long.valueOf(c.getUserId())).balance(BigDecimal.valueOf(0)).status("ACTIVE").build()
+                );
+        
         accountRepository.save(a);
-
+        
         return customer.getUserId();
     }
 

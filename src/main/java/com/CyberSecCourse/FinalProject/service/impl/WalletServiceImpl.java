@@ -1,5 +1,6 @@
 package com.CyberSecCourse.FinalProject.service.impl;
 
+import com.CyberSecCourse.FinalProject.dto.request.WalletRequestDTO;
 import com.CyberSecCourse.FinalProject.entity.Wallet;
 import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
 import com.CyberSecCourse.FinalProject.repository.WalletRepository;
@@ -68,6 +69,21 @@ public class WalletServiceImpl implements WalletService {
         transaction.setStatus(transactionResult);
         walletTransactionRepository.save(transaction);
         return transaction;
+    }
+
+    @Override
+    public Wallet createWallet(WalletRequestDTO walletRequestDTO) {
+        if(walletRepository.findByUserId(walletRequestDTO.getUserId()) != null)
+        {
+            throw new RuntimeException("Wallet is presented");
+        }
+        else{
+            Wallet wallet = Wallet.builder()
+                    .userId(walletRequestDTO.getUserId().intValue()).balance(walletRequestDTO.getBalance()).status(walletRequestDTO.getStatus()).build()
+                    ;
+            walletRepository.save(wallet);
+            return wallet;
+        }
     }
 
 }
