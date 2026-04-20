@@ -47,7 +47,7 @@ function Login() {
   const handleLoginSubmit = async e => {
     e.preventDefault();
     try {
-    const res = await axios.post('http://localhost:8099/auth/login', loginData, {
+    const res = await axios.post(`${import.meta.env.VITE_APP_API}/auth/login`, loginData, {
       withCredentials: true
     });        if (res.data.status === 200) {
               navigate('/');
@@ -71,7 +71,7 @@ function Login() {
     return;
   }
   try {
-    const res = await axios.post('http://localhost:8099/auth/register', registerData, {
+    const res = await axios.post(`${import.meta.env.VITE_APP_API}/auth/register`, registerData, {
       withCredentials: true
     });
     // Xử lý kết quả đăng ký

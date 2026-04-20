@@ -19,6 +19,7 @@ import Filter from "./Search/Filter";
 import { ModalProvider } from "./ModalContext";
 import PaymentResult from "./Payment/Payment";
 import Cart from "./Cart/Cart";
+import Wallet from "./Wallet/wallet";
 //import NavBar from "./NavBar/NavBar";
 
 function AppContent() {
@@ -31,7 +32,7 @@ function AppContent() {
 const checkAuth = async () => {
   try {
     const res = await axios.post(
-      'http://localhost:8036/auth/introspect',
+      `${import.meta.env.VITE_APP_API}/auth/introspect`,
       {},
       {
         headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
@@ -74,6 +75,8 @@ const checkAuth = async () => {
         <Route path="/Filter" element={<Filter />} />
         <Route path="/PaymentResult" element={<PaymentResult />} />
         <Route path="/Cart" element={<Cart />} />
+        <Route path="/Wallet" element={<Wallet />} />
+
       </Routes>
       <Footer />
     </>

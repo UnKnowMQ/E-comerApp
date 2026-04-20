@@ -29,7 +29,7 @@ import { useContext } from "react";
 
 // ...existing code...
 function Header() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null); // null = chưa login
   const [registerForm, setRegisterForm] = useState({
@@ -49,11 +49,12 @@ function Header() {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_APP_API}/auth/login`,
-        { username, password },
+        { email, password },
         { withCredentials: true }
       );
-      if (res.data.status !== "success") {
-      alert("Đăng nhâp thành công!");
+            console.log("response from login:", res.data);
+      if (res.data.status == 200) {
+      alert("Đăng nhâp thành công!" + res);
       setUser(res.data.data); // Cập nhật user state
       setShowLogin(false);
       } else {
@@ -78,9 +79,13 @@ function Header() {
         ...registerForm,
         gender: registerForm.gender === "nữ" ? false : true,
       };
-      await axios.post(`${import.meta.env.VITE_APP_API}/auth/register`, payload, {
+      const res = await axios.post(`${import.meta.env.VITE_APP_API}/auth/register`, payload, {
         withCredentials: true,
       });
+      if (res.data.status !== 200) {
+        alert("Đăng ký thất bại: " + res.data.message);
+        return;
+      }
       alert("Đăng ký thành công!");
       setRegisterForm({
         username: "",
@@ -103,7 +108,6 @@ const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(Mo
 
 
  useEffect(() => {
-  // ...existing code...
 const checkAuth = async () => {
   try {
     const res = await axios.post(
@@ -149,7 +153,7 @@ const checkAuth = async () => {
     <div>
       <nav className="custom-navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
         <div className="container">
-          <a className="navbar-brand" href="/">HLPC<span>.</span></a>
+          <a className="navbar-brand" href="/">ESHOP<span>.</span></a>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -211,6 +215,11 @@ const checkAuth = async () => {
                 <button className="dropdown-item">Đổi mật khẩu</button>
               </li>
               <li>
+                <a className="dropdown-item" href="/Wallet" style={{textDecoration: 'none', color: 'inherit'}}>
+                  <i className="bi bi-wallet2 me-2"></i>Ví của tôi
+                </a>
+              </li>
+              <li>
                 <hr className="dropdown-divider" />
               </li>
               <li>
@@ -245,9 +254,9 @@ const checkAuth = async () => {
               <Modal.Title>Login</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Form.Group className="mb-3" controlId="loginUsername">
-                <Form.Label>Username</Form.Label>
-                <Form.Control type="text" required value={username} onChange={(e) => setUsername(e.target.value)} />
+              <Form.Group className="mb-3" controlId="loginEmail">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
               </Form.Group>
               <Form.Group className="mb-3" controlId="loginPassword">
                 <Form.Label>Password</Form.Label>
