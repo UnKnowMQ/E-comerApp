@@ -18,6 +18,9 @@ public class PayOSConfig {
     private String checksumKey;
     @Bean
     public PayOS payOS() {
+        System.out.println("PayOS clientId: " + clientId);
+        System.out.println("PayOS apiKey: " + apiKey);
+        System.out.println("PayOS checksumKey: " + checksumKey);
         return new PayOS(
                 clientId,
                 apiKey,

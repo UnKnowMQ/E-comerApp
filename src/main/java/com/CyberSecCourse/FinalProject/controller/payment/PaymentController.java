@@ -2,13 +2,17 @@ package com.CyberSecCourse.FinalProject.controller.payment;
 
 
 
+import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
+import com.CyberSecCourse.FinalProject.repository.WalletTransactionRepository;
 import com.CyberSecCourse.FinalProject.service.impl.CheckoutServiceImpl;
+import com.CyberSecCourse.FinalProject.service.impl.WalletServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +21,7 @@ import vn.payos.PayOS;
 import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 
@@ -27,47 +32,52 @@ import java.util.Map;
 public class PaymentController {
 
     private final PayOS payOS;
-    private final CheckoutServiceImpl checkoutService;
 
-    @PostMapping(path = "/payos_transfer_handler")
-    public ObjectNode payosTransferHandler(@RequestBody ObjectNode body)
-            throws JsonProcessingException, IllegalArgumentException {
+    private final WalletServiceImpl walletService;
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode response = objectMapper.createObjectNode();
+    private final WalletTransactionRepository walletTransactionRepository;
 
+    @PostMapping("/payos_transfer_handler")
+    public ResponseEntity<?> payosTransferHandler(@RequestBody ObjectNode body) {
+
+        log.info("Webhook running!!!");
         try {
-            Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
 
-            // 1. Xác thực webhook
-            WebhookData verifiedData = payOS.webhooks().verify(webhookBody);
+            ObjectMapper mapper = new ObjectMapper();
+            Webhook webhook = mapper.treeToValue(body, Webhook.class);
 
+            WebhookData data = payOS.webhooks().verify(webhook);
 
-           //  2. Lấy payload map an toàn
-            String invoiceStatus = verifiedData.getDesc() != null ? verifiedData.getDesc() : "UNKNOWN";
-            Long orderCode = verifiedData.getOrderCode() != null  ? verifiedData.getOrderCode(): null;
-
-            log.info("WebhookData: " + verifiedData);
-            log.info("Webhook: " + webhookBody);
-//
-//            // 3. Cập nhật DB
-            if (orderCode != null) {
-                checkoutService.checkOut2(invoiceStatus, orderCode);
+            if (data == null) {
+                return ResponseEntity.ok("OK");
             }
 
-            // 4. Trả response
-            response.put("error", 0);
-            response.put("message", "Webhook delivered");
-            response.set("data", null);
-            return response;
+            Long orderCode = data.getOrderCode();
+            Long amount = data.getAmount();
+
+            if (orderCode == null) {
+                return ResponseEntity.ok("OK");
+            }
+
+            WalletTransaction tx = walletTransactionRepository.findByOrderCode(orderCode);
+
+            if (tx == null) {
+                return ResponseEntity.ok("OK");
+            }
+
+            Long userId = Long.valueOf(tx.getWallet().getUserId());
+
+            if ("PAID".equals(data.getDesc())) {
+                walletService.depositProcessing(userId, BigDecimal.valueOf(amount), "PAID", tx);
+            } else {
+                walletService.depositProcessing(userId, BigDecimal.valueOf(amount), "FAIL", tx);
+            }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            response.put("error", -1);
-            response.put("message", e.getMessage());
-            response.set("data", null);
-            return response;
+            log.error("Webhook error", e);
         }
+
+        return ResponseEntity.ok("OK");
     }
 
 

@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.docx4j.wml.R;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,14 +55,23 @@ public class OrderController {
 
     private final WalletTransactionRepository walletTransactionRepository;
 
+    @Value("${payos.client_id}")
+    private String clientId;
+
+    @Value("${payos.api-key}")
+    private String apiKey;
+
+    @Value("${payos.checksum-key}")
+    private String checksumKey;
 
     @PostMapping("/create")
     public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody requestBody) {
+        log.info("key:" + clientId + "apiKey:" + apiKey + "checksumKey:" + checksumKey);
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
 
         try {
-//            String productName = requestBody.getProductName();
+            String productName = requestBody.getProductName();
 //            String username = requestBody.getUsername();
             String description = requestBody.getDescription();
             String returnUrl = requestBody.getReturnUrl();
@@ -73,13 +83,19 @@ public class OrderController {
             // Gen order code
             String currentTimeString = String.valueOf(new Date().getTime());
             long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
-
+                PaymentLinkItem item = PaymentLinkItem.builder()
+                        .name(productName)
+                        .price(Long.valueOf(price))
+                        .quantity(1)
+                        .build();
 
             CreatePaymentLinkRequest paymentRequest = CreatePaymentLinkRequest.builder()
                     .orderCode(orderCode)
+                    .item(item)
                     .amount((long) price)
                     .description(description)
                     .cancelUrl(cancelUrl)
+                    .expiredAt(System.currentTimeMillis() / 1000 + 15 * 60)
                     .returnUrl(returnUrl)
                     .build();
 

@@ -5,6 +5,7 @@ import com.CyberSecCourse.FinalProject.entity.Wallet;
 import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface WalletService {
 
@@ -12,4 +13,9 @@ public interface WalletService {
     WalletTransaction depositProcessing(Long UserId, BigDecimal amount,String transactionResult, WalletTransaction transaction);
 
     Wallet createWallet(WalletRequestDTO walletRequestDTO);
-}
+    List<Wallet> getAllWallets();
+    Wallet getWalletById(Integer id);
+    Wallet updateWallet(Integer id, Wallet wallet);
+    void deleteWallet(Integer id);
+
+    }

@@ -32,7 +32,7 @@ public class RegisterRequestDTO implements Serializable {
 
     private AccountStatus status;
 
-    private User use;
+    private User user;
 
     private Instant createdAt;
 

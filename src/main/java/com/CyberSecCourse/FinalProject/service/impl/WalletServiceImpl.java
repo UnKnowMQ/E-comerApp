@@ -8,10 +8,10 @@ import com.CyberSecCourse.FinalProject.repository.WalletTransactionRepository;
 import com.CyberSecCourse.FinalProject.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.payos.model.v2.paymentRequests.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +32,6 @@ public class WalletServiceImpl implements WalletService {
         }
         Wallet wallet = walletRepository.findByUserId(UserId);
 
-        // cập nhật số dư
-        wallet.setBalance(wallet.getBalance().add(amount));
 
         walletRepository.save(wallet);
 
@@ -56,15 +54,15 @@ public class WalletServiceImpl implements WalletService {
 
         Wallet wallet = walletRepository.findByUserId(UserId);
 
+        if (wallet == null) {
+            throw new RuntimeException("Wallet not found for userId: " + UserId);
+        }
         if(transactionResult.equals("PAID"))
         {
             transaction.setStatus("SUCCESS");
             walletTransactionRepository.save(transaction);
             return transaction;
         }
-        // rollback
-        wallet.setBalance(wallet.getBalance().subtract(amount));
-        walletRepository.save(wallet);
 
         transaction.setStatus(transactionResult);
         walletTransactionRepository.save(transaction);
@@ -84,6 +82,37 @@ public class WalletServiceImpl implements WalletService {
             walletRepository.save(wallet);
             return wallet;
         }
+    }
+
+    // Get all
+    public List<Wallet> getAllWallets(){
+        return walletRepository.findAll();
+    }
+
+    // Get by id
+    public Wallet getWalletById(Integer id){
+        return walletRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+    }
+    // Get by id
+    public Wallet getWalletByUserId(Long id){
+        return walletRepository.findByUserId(id);
+    }
+
+    // Update
+    public Wallet updateWallet(Integer id, Wallet wallet){
+        Wallet existingWallet = getWalletById(id);
+
+        existingWallet.setUserId(wallet.getUserId());
+        existingWallet.setBalance(wallet.getBalance());
+        existingWallet.setStatus(wallet.getStatus());
+
+        return walletRepository.save(existingWallet);
+    }
+
+    // Delete
+    public void deleteWallet(Integer id){
+        walletRepository.deleteById(id);
     }
 
 }

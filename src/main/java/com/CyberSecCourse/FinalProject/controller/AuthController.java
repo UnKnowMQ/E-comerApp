@@ -33,13 +33,13 @@ import java.util.Optional;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
 
     @PostMapping("/login")
     public ResponseData<AuthResponse> login(@RequestBody AuthRequestDTO authRequestDTO, HttpServletResponse response) {
         try{
             var result = authService.isAuthenticated(authRequestDTO);
-            if(result.getIsAuthenticated() == true)
+            if(result.getIsAuthenticated())
             {
 
                 return new ResponseData<>(HttpStatus.OK.value(),"User authenticated",result);
@@ -77,7 +77,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseData<Long> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
         try{
-            System.out.println(registerRequestDTO.getPassword());;
+            System.out.println(registerRequestDTO.getUser().getAddress());;
             Long result = authService.registerCustomer(registerRequestDTO);
             if(result == -1)
             {

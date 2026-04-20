@@ -49,6 +49,7 @@ public class AuthServiceImpl  implements AuthService {
     private final RefreshTokenRepsitory refreshTokenRepsitory;
     
     private final WalletServiceImpl walletService;
+    private final UserRepository userRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -56,7 +57,9 @@ public class AuthServiceImpl  implements AuthService {
 
     @Override
     public AuthResponse isAuthenticated(AuthRequestDTO authRequestDTO) {
+        log.info(authRequestDTO.getEmail());
         var account = accountRepository.findByEmail(authRequestDTO.getEmail()).orElseThrow();
+        log.info(account.toString());
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isAuth = passwordEncoder.matches(authRequestDTO.getPassword(), account.getPassword());
         if(!isAuth)
@@ -68,6 +71,8 @@ public class AuthServiceImpl  implements AuthService {
                     .build();
         }
         var token = generateToken(account);
+
+        log.info(token);
         return AuthResponse.builder()
                 .token(token)
                 .isAuthenticated(true)
@@ -85,8 +90,8 @@ public class AuthServiceImpl  implements AuthService {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .claim("scope",role)
                 .subject(account.getEmail())
-//                .claim("fullname",account.getCustomer().getFirstName() + " "+ account.getCustomer().getLastName())
-//                .claim("customerId",account.getCustomer().getCustomerId())
+                .claim("email",account.getEmail())
+                .claim("userId",account.getUserId())
                 .issuer("Eshop.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
@@ -136,6 +141,7 @@ public class AuthServiceImpl  implements AuthService {
         return IntrospectiveResponse.builder()
                 .isValid(verifired && exprirationTime.after(new Date()) && !checkInvalid)
                 .fullName((String) jwt.getJWTClaimsSet().getClaim("email"))
+                .customerId(Integer.parseInt(jwt.getJWTClaimsSet().getClaim("userId").toString()))
                 .build();
     }
 
@@ -162,7 +168,7 @@ public class AuthServiceImpl  implements AuthService {
                 .lastname(registerRequestDTO.getLastName())
                 .gender(registerRequestDTO.getGender())
                 .role("Customer")
-                .address(null).status("Active").note(null).username(registerRequestDTO.getUsername()).avatar(null)
+                .address(registerRequestDTO.getUser().getAddress()).status("Active").note(null).username(registerRequestDTO.getUsername()).avatar(null)
                 .build();
         a.setUserId(c.getUserId());
 
@@ -197,4 +203,5 @@ public class AuthServiceImpl  implements AuthService {
         }
         return false;
     }
+
 }
