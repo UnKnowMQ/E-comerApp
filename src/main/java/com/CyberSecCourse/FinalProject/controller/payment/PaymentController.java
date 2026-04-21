@@ -66,8 +66,8 @@ public class PaymentController {
             }
 
             Long userId = Long.valueOf(tx.getWallet().getUserId());
-
-            if ("PAID".equals(data.getDesc())) {
+            log.info(data.getDesc());
+            if ("success".equals(data.getDesc())) {
                 walletService.depositProcessing(userId, BigDecimal.valueOf(amount), "PAID", tx);
             } else {
                 walletService.depositProcessing(userId, BigDecimal.valueOf(amount), "FAIL", tx);

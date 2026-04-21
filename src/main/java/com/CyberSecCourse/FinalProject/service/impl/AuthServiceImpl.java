@@ -150,7 +150,12 @@ public class AuthServiceImpl  implements AuthService {
 
         if(accountRepository.findByEmail(registerRequestDTO.getEmail()).isPresent())
         {
-            throw new RuntimeException("Email is used");
+            throw new RuntimeException("Email is used!");
+        }
+        if(accountRepository.findByUsername(registerRequestDTO.getUsername()).isPresent())
+        {
+            throw new RuntimeException("Username is used!");
+
         }
 
         Account a = Account.builder()
@@ -177,7 +182,7 @@ public class AuthServiceImpl  implements AuthService {
         walletService.createWallet(WalletRequestDTO.builder()
                         .userId(Long.valueOf(c.getUserId())).balance(BigDecimal.valueOf(0)).status("ACTIVE").build()
                 );
-        
+        a.setUserId(customer.getUserId());
         accountRepository.save(a);
         
         return customer.getUserId();

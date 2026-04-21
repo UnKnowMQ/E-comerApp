@@ -62,6 +62,7 @@ public class WalletServiceImpl implements WalletService {
         {
             transaction.setStatus("SUCCESS");
             walletTransactionRepository.save(transaction);
+            wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
             return transaction;
         }
 
