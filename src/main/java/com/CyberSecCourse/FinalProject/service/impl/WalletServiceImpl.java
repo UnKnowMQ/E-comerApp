@@ -1,6 +1,7 @@
 package com.CyberSecCourse.FinalProject.service.impl;
 
 import com.CyberSecCourse.FinalProject.dto.request.WalletRequestDTO;
+import com.CyberSecCourse.FinalProject.dto.response.WalletInformationResponse;
 import com.CyberSecCourse.FinalProject.entity.Wallet;
 import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
 import com.CyberSecCourse.FinalProject.repository.WalletRepository;
@@ -113,6 +114,10 @@ public class WalletServiceImpl implements WalletService {
     // Delete
     public void deleteWallet(Integer id){
         walletRepository.deleteById(id);
+    }
+    @Override
+    public WalletInformationResponse getWalletInformationByUserId(Integer userId) {
+        return walletRepository.findWalletInformationByUserId(userId);
     }
 
 }

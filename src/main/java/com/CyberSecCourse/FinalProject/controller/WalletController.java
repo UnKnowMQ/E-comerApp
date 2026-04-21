@@ -1,5 +1,6 @@
 package com.CyberSecCourse.FinalProject.controller;
 
+import com.CyberSecCourse.FinalProject.dto.response.WalletInformationResponse;
 import com.CyberSecCourse.FinalProject.entity.Wallet;
 import com.CyberSecCourse.FinalProject.service.impl.WalletServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,9 @@ public class WalletController {
     public void deleteWallet(@PathVariable Integer id){
         walletService.deleteWallet(id);
     }
-
+    @GetMapping("/information/{userId}")
+    public WalletInformationResponse getWalletInformation(@PathVariable Integer userId) {
+        return walletService.getWalletInformationByUserId(userId);
+    }
 
 }

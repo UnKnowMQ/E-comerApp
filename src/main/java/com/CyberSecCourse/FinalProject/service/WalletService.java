@@ -1,6 +1,7 @@
 package com.CyberSecCourse.FinalProject.service;
 
 import com.CyberSecCourse.FinalProject.dto.request.WalletRequestDTO;
+import com.CyberSecCourse.FinalProject.dto.response.WalletInformationResponse;
 import com.CyberSecCourse.FinalProject.entity.Wallet;
 import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
 
@@ -17,5 +18,7 @@ public interface WalletService {
     Wallet getWalletById(Integer id);
     Wallet updateWallet(Integer id, Wallet wallet);
     void deleteWallet(Integer id);
+    WalletInformationResponse getWalletInformationByUserId(Integer userId);
 
-    }
+
+}
