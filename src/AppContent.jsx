@@ -20,6 +20,7 @@ import { ModalProvider } from "./ModalContext";
 import PaymentResult from "./Payment/Payment";
 import Cart from "./Cart/Cart";
 import Wallet from "./Wallet/wallet";
+import QRCheckout from "./QRCheckout/QRCheckout";
 //import NavBar from "./NavBar/NavBar";
 
 function AppContent() {
@@ -76,6 +77,7 @@ const checkAuth = async () => {
         <Route path="/PaymentResult" element={<PaymentResult />} />
         <Route path="/Cart" element={<Cart />} />
         <Route path="/Wallet" element={<Wallet />} />
+        <Route path="/QRCheckout" element={<QRCheckout />} />
 
       </Routes>
       <Footer />

@@ -25,7 +25,16 @@ import '../assets/vendor/simple-datatables/simple-datatables.js'
 import '../assets/js/main.js';
 
 function Wallet () {
-    const [balance, setBalance] = useState(2500.00);
+    const navigate = useNavigate();
+    const [balance, setBalance] = useState(0);
+    const [walletInfo, setWalletInfo] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
+        status: 'ACTIVE',
+        totalDeposit: 0,
+        totalSpend: 0
+    });
     const [activeTab, setActiveTab] = useState('balance');
     const [depositAmount, setDepositAmount] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -38,20 +47,97 @@ function Wallet () {
         { id: 5, type: 'purchase', amount: -249.99, date: '2026-04-05', status: 'success', method: 'Wallet Balance' },
     ]);
 
-    const handleDeposit = () => {
+    useEffect(() => {
+        const fetchWalletBalance = async () => {
+            console.log('useEffect chạy rồi!');
+            const customerId = localStorage.getItem('customerId');
+            const token = localStorage.getItem('jwt');
+            console.log('customerId:', customerId);
+            console.log('token:', token);
+            
+            if (customerId && token) {
+                try {
+                    const apiUrl = `${import.meta.env.VITE_APP_API}/wallet/information/${customerId}`;
+                    console.log('Fetching từ URL:', apiUrl);
+                    
+                    const response = await axios.get(apiUrl, {
+                        headers: {
+                            'accept': '*/*',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    console.log('Wallet balance response:', response.data);
+                    const data = response.data;
+                    
+                    setBalance(data.balance);
+                    setWalletInfo({
+                        fullName: data.fullName || '',
+                        email: data.email || '',
+                        phone: data.phone || '',
+                        status: data.status || 'ACTIVE',
+                        totalDeposit: data.totalDeposit || 0,
+                        totalSpend: data.totalSpend || 0
+                    });
+                } catch (error) {
+                    console.error('Error fetching wallet balance:', error);
+                }
+            } else {
+                console.log('Không có customerId hoặc token trong localStorage');
+            }
+        };
+        fetchWalletBalance();
+    }, []);
+
+    const handleDeposit = async () => {
         if (depositAmount && parseFloat(depositAmount) > 0) {
-            const newBalance = balance + parseFloat(depositAmount);
-            setBalance(newBalance);
-            setTransactions([...transactions, {
-                id: transactions.length + 1,
-                type: 'deposit',
-                amount: parseFloat(depositAmount),
-                date: new Date().toISOString().split('T')[0],
-                status: 'success',
-                method: paymentMethod === 'credit-card' ? 'Credit Card' : paymentMethod === 'bank' ? 'Bank Transfer' : 'PayPal'
-            }]);
-            alert('Nạp tiền thành công!');
-            setDepositAmount('');
+            const customerId = localStorage.getItem('customerId');
+            const token = localStorage.getItem('jwt');
+            
+            if (!customerId || !token) {
+                alert('Vui lòng đăng nhập lại!');
+                return;
+            }
+
+            try {
+                const apiUrl = `${import.meta.env.VITE_APP_API}/Order/create`;
+                console.log('Depositing to:', apiUrl);
+                
+                const response = await axios.post(apiUrl, {
+                    productName: 'Nạp tiền vào Ví EWallet',
+                    username: walletInfo.fullName || 'User',
+                    description: `Nạp tiền số ${depositAmount}đ`,
+                    userId: customerId,
+                    returnUrl: `${import.meta.env.VITE_APP_FE_ENDPOINT}/wallet`,
+                    price: parseFloat(depositAmount),
+                    cancelUrl: `${import.meta.env.VITE_APP_FE_ENDPOINT}/wallet`
+                }, {
+                    headers: {
+                        'accept': '*/*',
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Deposit response:', response.data);
+                
+                if (response.data.error === 0 && response.data.data.qrCode) {
+                    navigate('/QRCheckout', {
+                        state: {
+                            qrCode: response.data.data.qrCode,
+                            amount: response.data.data.amount,
+                            orderCode: response.data.data.orderCode,
+                            checkoutUrl: response.data.data.checkoutUrl,
+                            description: response.data.data.description
+                        }
+                    });
+                } else {
+                    alert('Lỗi nạp tiền: ' + (response.data.message || 'Không rõ'));
+                }
+            } catch (error) {
+                console.error('Error depositing:', error);
+                alert('Lỗi nạp tiền: ' + (error.response?.data?.message || error.message));
+            }
         }
     };
 
@@ -106,7 +192,7 @@ function Wallet () {
                                     <div className="card-body text-center">
                                         <i className="bi bi-arrow-down-circle text-success" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
                                         <h6 className="card-title">Tổng Nạp</h6>
-                                        <p className="text-success fw-bold">+2,500₫</p>
+                                        <p className="text-success fw-bold">+{walletInfo.totalDeposit.toLocaleString('vi-VN')}₫</p>
                                     </div>
                                 </div>
                             </div>
@@ -115,7 +201,7 @@ function Wallet () {
                                     <div className="card-body text-center">
                                         <i className="bi bi-arrow-up-circle text-danger" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
                                         <h6 className="card-title">Tổng Chi</h6>
-                                        <p className="text-danger fw-bold">-600₫</p>
+                                        <p className="text-danger fw-bold">-{walletInfo.totalSpend.toLocaleString('vi-VN')}₫</p>
                                     </div>
                                 </div>
                             </div>
@@ -185,19 +271,19 @@ function Wallet () {
                                         <div className="row">
                                             <div className="col-md-6 mb-4">
                                                 <label className="form-label text-muted">Tên Chủ Ví</label>
-                                                <p className="fw-bold">Nguyễn Văn A</p>
+                                                <p className="fw-bold">{walletInfo.fullName || 'Không có dữ liệu'}</p>
                                             </div>
                                             <div className="col-md-6 mb-4">
                                                 <label className="form-label text-muted">Email</label>
-                                                <p className="fw-bold">nguyenvana@example.com</p>
+                                                <p className="fw-bold">{walletInfo.email || 'Không có dữ liệu'}</p>
                                             </div>
                                             <div className="col-md-6 mb-4">
                                                 <label className="form-label text-muted">Số điện thoại</label>
-                                                <p className="fw-bold">0123456789</p>
+                                                <p className="fw-bold">{walletInfo.phone || 'Không có dữ liệu'}</p>
                                             </div>
                                             <div className="col-md-6 mb-4">
                                                 <label className="form-label text-muted">Trạng Thái Ví</label>
-                                                <p className="fw-bold"><span className="badge bg-success">Hoạt Động</span></p>
+                                                <p className="fw-bold"><span className={`badge ${walletInfo.status === 'ACTIVE' ? 'bg-success' : 'bg-warning'}`}>{walletInfo.status === 'ACTIVE' ? 'Hoạt Động' : 'Không Hoạt Động'}</span></p>
                                             </div>
                                         </div>
                                     </div>
