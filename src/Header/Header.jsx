@@ -61,8 +61,11 @@ function Header() {
         alert("Đăng nhập thất bại: " + res.data.message);
         return;
       }
-      // Lưu token vào localStorage và cập nhật user state
+      // Lưu accessToken vào localStorage, refreshToken vào sessionStorage
           localStorage.setItem("jwt", res.data.data.token);
+          if (res.data.data.refreshToken) {
+            sessionStorage.setItem("refreshToken", res.data.data.refreshToken);
+          }
     } catch (err) {
       alert("Login error: " + (err.response?.data?.message || err.message));
     }
