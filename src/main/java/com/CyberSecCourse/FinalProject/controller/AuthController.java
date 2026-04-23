@@ -1,13 +1,11 @@
 package com.CyberSecCourse.FinalProject.controller;
 
-import com.CyberSecCourse.FinalProject.dto.request.AuthRequestDTO;
-import com.CyberSecCourse.FinalProject.dto.request.CustomerRequestDTO;
-import com.CyberSecCourse.FinalProject.dto.request.IntrospectRequestDTO;
-import com.CyberSecCourse.FinalProject.dto.request.RegisterRequestDTO;
-import com.CyberSecCourse.FinalProject.dto.response.AuthResponse;
-import com.CyberSecCourse.FinalProject.dto.response.IntrospectiveResponse;
-import com.CyberSecCourse.FinalProject.dto.response.ResponseData;
-import com.CyberSecCourse.FinalProject.dto.response.ResponseError;
+import com.CyberSecCourse.FinalProject.dto.request.*;
+import com.CyberSecCourse.FinalProject.dto.response.*;
+import com.CyberSecCourse.FinalProject.entity.Account;
+import com.CyberSecCourse.FinalProject.entity.RefreshToken;
+import com.CyberSecCourse.FinalProject.repository.AccountRepository;
+import com.CyberSecCourse.FinalProject.repository.RefreshTokenRepsitory;
 import com.CyberSecCourse.FinalProject.service.AuthService;
 import com.CyberSecCourse.FinalProject.service.impl.AuthServiceImpl;
 import com.CyberSecCourse.FinalProject.utils.HttpStatusCustom;
@@ -23,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -34,6 +33,8 @@ import java.util.Optional;
 public class AuthController {
 
     private final AuthServiceImpl authService;
+    private final RefreshTokenRepsitory refreshTokenRepsitory;
+    private final AccountRepository accountRepository;
 
     @PostMapping("/login")
     public ResponseData<AuthResponse> login(@RequestBody AuthRequestDTO authRequestDTO, HttpServletResponse response) {
@@ -92,19 +93,51 @@ public class AuthController {
         }
     }
 
+//    @PostMapping("/logout")
+//    public ResponseData<Boolean> logout(HttpServletRequest request) {
+//        try{
+//            boolean result = authService.logout(request);
+//            return new ResponseData<>(HttpStatus.OK.value(),"Logout!",result);
+//        }
+//        catch (Exception e)
+//        {
+//            log.error("there is an error : {}",e.getMessage());
+//            return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+//        }
+
     @PostMapping("/logout")
-    public ResponseData<Boolean> logout(HttpServletRequest request) {
-        try{
-            boolean result = authService.logout(request);
-            return new ResponseData<>(HttpStatus.OK.value(),"Logout!",result);
-        }
-        catch (Exception e)
-        {
-            log.error("there is an error : {}",e.getMessage());
-            return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
-        }
+    public String logout(@RequestBody RefreshRequest request) {
+
+        RefreshToken token = refreshTokenRepsitory
+                .findByToken(request.getRefreshToken());
+
+        token.setRevoked(true);
+        refreshTokenRepsitory.save(token);
+
+        return "Logged out successfully";
     }
 
+    @PostMapping("/refresh")
+    public ResponseData<?> refresh(@RequestBody RefreshRequest request) {
+
+        RefreshToken token = refreshTokenRepsitory
+                .findByToken(request.getRefreshToken())
+                ;
+
+        if (token.getRevoked() || token.getExpiredAt().isBefore(LocalDateTime.now())) {
+           return new ResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Token is expired or revoked");
+        }
+
+        Account account = accountRepository.findByUserId(token.getUserId()).orElseThrow();
+
+        String newAccessToken = authService.generateAccessToken(account);
+
+        TokenResponse tokenResponse  = TokenResponse.builder()
+                .accessToken(newAccessToken)
+                .build();
+                    return new ResponseData<>(HttpStatus.OK.value(),"Access token renew!",tokenResponse);
+
+    }
 
 
 }

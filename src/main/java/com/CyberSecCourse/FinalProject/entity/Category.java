@@ -31,8 +31,11 @@ public class Category {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "category_img", nullable = true)
+    private String categoryImg;
+
     @Column(name = "parent_id")
-    private Integer parent_id ;
+    private Integer parentId;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "category")

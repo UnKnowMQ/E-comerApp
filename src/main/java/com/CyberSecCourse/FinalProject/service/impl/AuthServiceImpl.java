@@ -32,10 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +56,9 @@ public class AuthServiceImpl  implements AuthService {
     public AuthResponse isAuthenticated(AuthRequestDTO authRequestDTO) {
         log.info(authRequestDTO.getEmail());
         var account = accountRepository.findByEmail(authRequestDTO.getEmail()).orElseThrow();
-        log.info(account.toString());
+        log.info("email:" + authRequestDTO.getEmail());
+        log.info("account:" + account.getUserId());
+
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isAuth = passwordEncoder.matches(authRequestDTO.getPassword(), account.getPassword());
         if(!isAuth)
@@ -70,9 +69,7 @@ public class AuthServiceImpl  implements AuthService {
                     .isAuthenticated(false)
                     .build();
         }
-        var token = generateToken(account);
-
-        log.info(token);
+        var token = generateRefreshToken(account);
         return AuthResponse.builder()
                 .token(token)
                 .isAuthenticated(true)
@@ -207,6 +204,47 @@ public class AuthServiceImpl  implements AuthService {
             e.printStackTrace();
         }
         return false;
+    }
+    public String generateAccessToken(Account account) {
+        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
+
+        User user = customerRepository.getReferenceById(account.getUserId());
+        String role = user.getRole();
+
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(account.getEmail())
+                .issuer("Eshop.com")
+                .issueTime(new Date())
+                .expirationTime(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES))) // ngắn hạn
+                .claim("scope", role)
+                .claim("userId", account.getUserId())
+                .claim("email", account.getEmail())
+                .jwtID(UUID.randomUUID().toString()) // rất nên có
+                .build();
+
+        JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(claimsSet.toJSONObject()));
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return jwsObject.serialize(); // ❗ KHÔNG lưu DB
+        } catch (Exception e) {
+            log.error("Cannot create access token: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+    public String generateRefreshToken(Account account) {
+        String refreshToken = UUID.randomUUID().toString();
+
+        refreshTokenRepsitory.save(
+                RefreshToken.builder()
+                        .token(refreshToken)
+                        .userId(account.getUserId())
+                        .expiredAt(LocalDateTime.now().plusDays(7))
+                        .revoked(false)
+                        .build()
+        );
+
+        return refreshToken;
     }
 
 }
