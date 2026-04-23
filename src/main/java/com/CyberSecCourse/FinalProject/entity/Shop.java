@@ -1,8 +1,10 @@
 package com.CyberSecCourse.FinalProject.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "shops")
@@ -56,4 +58,9 @@ public class Shop {
 
     @Column(name = "business_verification", nullable = false, length = 255)
     private String businessVerification;
+
+    @OneToMany(mappedBy = "currentShop")
+    @ToString.Exclude
+    @JsonIgnore
+    private Set<Product> listProduct;
 }

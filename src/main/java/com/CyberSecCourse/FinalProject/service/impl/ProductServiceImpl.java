@@ -46,9 +46,8 @@ public class ProductServiceImpl implements ProductService {
 
 
         List<ProductResponse> all = products.stream().map(product -> ProductResponse.builder()
-                .productId(product.getProductId())
                 .productName(product.getProductName())
-                .brand_name(product.getBrand() == null ? "" : product.getBrand().getBrand_name() )
+//                .brand_name(product.getBrand() == null ? "" : product.getBrand().getBrand_name() )
                 .id(product.getId())
                 .price(product.getPrice())
                 .slug(product.getSlug())
@@ -57,12 +56,12 @@ public class ProductServiceImpl implements ProductService {
                 .quantity(product.getQuantity())
                 .warranty(product.getWarranty())
                 .status(ProductStatus.valueOf(product.getStatus()))
-                .imageUrl(
-                        product.getImages().stream()
-                                .findFirst()
-                                .map(img -> img.getUrl())
-                                .orElse(null)
-                )
+//                .imageUrl(
+//                        product.getImages().stream()
+//                                .findFirst()
+//                                .map(img -> img.getUrl())
+//                                .orElse(null)
+//                )
 
                 .build()).toList();
 

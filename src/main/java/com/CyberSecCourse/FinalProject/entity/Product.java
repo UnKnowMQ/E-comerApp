@@ -78,4 +78,8 @@ public class Product{
     @JsonIgnore
     private Set<Image> images;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    private Shop currentShop;
+
 }

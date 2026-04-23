@@ -88,7 +88,6 @@ public class CheckoutServiceImpl implements CheckoutService {
                     .invoice(invoice)
                     .unitPrice(productRequestDTO.getPrice())
                     .product(product)
-                    .subTotal(productRequestDTO.getPrice())
                     .quantity(1)
                     .id(invoiceDetailId)
                     .build();
@@ -135,7 +134,6 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .invoice(invoice)
                 .product(cartItem.getProduct())
                 .quantity(cartItem.getQuantity())
-                .subTotal( cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
                 .unitPrice(cartItem.getPrice())
                 .build();
 

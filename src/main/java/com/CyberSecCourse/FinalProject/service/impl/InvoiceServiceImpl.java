@@ -61,7 +61,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             placeholders.put("quantity" + i, sp.getQuantity().toString());
             placeholders.put("productname" + i, sp.getProduct().getProductName());
             placeholders.put("unitprice" + i, sp.getUnitPrice().toString());
-            placeholders.put("subtotal" + i, sp.getSubTotal().toString());
             i++;
         }
 

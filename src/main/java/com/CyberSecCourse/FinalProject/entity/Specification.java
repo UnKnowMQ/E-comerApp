@@ -28,13 +28,4 @@ public class Specification {
     @Column(name = "unit")
     private String unit;
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
-    @JoinColumn(name = "category_id")
-    @ToString.Exclude
-    private Category category;
-
-    @ToString.Exclude
-    @OneToMany(mappedBy = "specification")
-    private Set<ProducSpecification> productSpecSet = new HashSet<>();
-
 }

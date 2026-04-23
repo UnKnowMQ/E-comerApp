@@ -34,10 +34,5 @@ public class InvoiceDetail {
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
-    @Column(name = "subtotal")
-    private BigDecimal subTotal;
-
-
-
 
 }

@@ -3,6 +3,7 @@ package com.CyberSecCourse.FinalProject.dto.response;
 import com.CyberSecCourse.FinalProject.entity.Brand;
 import com.CyberSecCourse.FinalProject.entity.Category;
 import com.CyberSecCourse.FinalProject.entity.Discount;
+import com.CyberSecCourse.FinalProject.entity.Image;
 import com.CyberSecCourse.FinalProject.utils.ProductStatus;
 import jakarta.persistence.Column;
 import lombok.Builder;
@@ -11,6 +12,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -18,8 +21,6 @@ import java.time.Instant;
 public class ProductResponse {
 
     private Integer id;
-
-    private String productId;
 
     private String productName;
 
@@ -37,11 +38,12 @@ public class ProductResponse {
 
     private Instant created_at;
 
-    private String brand_name;
-
     private String category_name;
 
-    private String discount_name;
+    private String description;
 
-    private String imageUrl;
+
+
+    private Set<Image> imageUrl;
+
 }

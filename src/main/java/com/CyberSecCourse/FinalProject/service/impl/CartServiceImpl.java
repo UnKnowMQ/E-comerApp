@@ -138,7 +138,7 @@ public class CartServiceImpl implements CartService {
              cart.getListItem().forEach(cartItem ->{
                  ProductResponse productResponse = productMapper.toResponse(cartItem.getProduct());
                  List<String> listImageUrl = productRepository.getImageByProductId(productResponse.getId());
-                 productResponse.setImageUrl(listImageUrl.size() != 0 ? listImageUrl.get(0) : null);
+//                 productResponse.setImageUrl(listImageUrl.size() != 0 ? listImageUrl.get(0) : null);
                  listCartItemResponse.add(CartItemResponse.builder()
                                  .productResponse(productResponse)
                                  .price(cartItem.getPrice())

@@ -5,33 +5,27 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "product_specification")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProducSpecification {
+@Table(name = "product_specification")
+public class ProductSpecification {
 
     @EmbeddedId
     private ProductSpecificationId productSpecificationId;
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "spec_id")
     @MapsId("specificationId")
     private Specification specification;
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id")
     @MapsId("productId")
     private Product product;
 
     @Column(name = "value", nullable = false)
     private String value;
-
-    @Column(name = "warranty", nullable = true)
-    private String warranty;
-
-
-
 }
