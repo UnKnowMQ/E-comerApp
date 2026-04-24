@@ -139,6 +139,8 @@ public class AuthServiceImpl  implements AuthService {
                 .isValid(verifired && exprirationTime.after(new Date()) && !checkInvalid)
                 .fullName((String) jwt.getJWTClaimsSet().getClaim("email"))
                 .customerId(Integer.parseInt(jwt.getJWTClaimsSet().getClaim("userId").toString()))
+                .userName((String) jwt.getJWTClaimsSet().getClaim("username"))
+                .role((String) jwt.getJWTClaimsSet().getClaim("scope"))
                 .build();
     }
 
@@ -219,6 +221,7 @@ public class AuthServiceImpl  implements AuthService {
                 .claim("scope", role)
                 .claim("userId", account.getUserId())
                 .claim("email", account.getEmail())
+                .claim("username",user.getUsername())
                 .jwtID(UUID.randomUUID().toString()) // rất nên có
                 .build();
 

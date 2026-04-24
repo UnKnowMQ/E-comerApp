@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -48,10 +49,10 @@ public class Shop {
     private Boolean verified;
 
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "update_at")
-    private LocalDate updateAt;
+    private LocalDateTime updateAt;
 
     @Column(name = "business_type", length = 255)
     private String businessType;

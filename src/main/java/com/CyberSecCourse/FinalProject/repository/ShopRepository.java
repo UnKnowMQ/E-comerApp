@@ -1,0 +1,16 @@
+package com.CyberSecCourse.FinalProject.repository;
+
+import com.CyberSecCourse.FinalProject.entity.Shop;
+import com.CyberSecCourse.FinalProject.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ShopRepository extends JpaRepository<Shop,Integer> {
+
+    @Query("Select s from Shop s where s.shopName = :shopName")
+    Shop findShopByShopName(String shopName);
+    @Query("Select s from Shop s where s.userId = :userId")
+    Shop findShopByUserId(Integer userId);
+}

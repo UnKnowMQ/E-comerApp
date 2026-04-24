@@ -11,4 +11,5 @@ public class IntrospectiveResponse {
     private String fullName;
     private String userName;
     private Integer customerId;
+    private String role;
 }
