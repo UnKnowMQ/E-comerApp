@@ -54,17 +54,18 @@ function Header() {
       );
             console.log("response from login:", res.data);
       if (res.data.status == 200) {
-      alert("Đăng nhâp thành công!" + res);
+      alert("Đăng nhâp thành công!");
       setUser(res.data.data); // Cập nhật user state
       setShowLogin(false);
       } else {
         alert("Đăng nhập thất bại: " + res.data.message);
         return;
       }
-      // Lưu accessToken vào localStorage, refreshToken vào sessionStorage
-          localStorage.setItem("jwt", res.data.data.token);
+      console.log("Authenticated user:", res.data.data);
+      // Lưu accessToken và refreshToken vào localStorage
+          localStorage.setItem("refreshToken", res.data.data.token);
           if (res.data.data.refreshToken) {
-            sessionStorage.setItem("refreshToken", res.data.data.refreshToken);
+            localStorage.setItem("refreshToken", res.data.data.refreshToken);
           }
     } catch (err) {
       alert("Login error: " + (err.response?.data?.message || err.message));

@@ -31,10 +31,10 @@ function AppContent() {
  useEffect(() => {
 // ...existing code...
 const tryRefreshToken = async () => {
-  const refreshToken = sessionStorage.getItem("refreshToken");
+  const refreshToken = localStorage.getItem("refreshToken");
   if (!refreshToken) {
-    localStorage.removeItem("jwt");
-    return;
+    // Không có refreshToken, không làm gì cả
+    return false;
   }
   try {
     const res = await axios.post(
@@ -43,24 +43,34 @@ const tryRefreshToken = async () => {
       { withCredentials: true }
     );
     if (res.data.status === 200 && res.data.data?.accessToken) {
-      // Chỉ lưu accessToken vào localStorage, KHÔNG lưu refreshToken
       localStorage.setItem("jwt", res.data.data.accessToken);
       console.log("Access token refreshed successfully");
+      return true;
     } else {
       localStorage.removeItem("jwt");
-      sessionStorage.removeItem("refreshToken");
+      localStorage.removeItem("refreshToken");
+      return false;
     }
   } catch (err) {
-    localStorage.removeItem("jwt");
-    sessionStorage.removeItem("refreshToken");
     console.error("Refresh token failed:", err);
+    return false;
   }
 };
 
 const checkAuth = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  // Chưa login, không làm gì
+  if (!refreshToken) return;
+
+  // Luôn gọi /auth/refresh để lấy accessToken mới nhất từ refreshToken
+  const refreshed = await tryRefreshToken();
+  if (!refreshed) return;
+
+  // Introspect với accessToken vừa refresh để lấy thông tin user
   try {
     const res = await axios.post(
-      `${import.meta.env.VITE_APP_API}/auth/introspect`,
+      `${import.meta.env.VITE_APP_API}/auth/introspect?Authorization=check`,
       {},
       {
         headers: { Authorization: `Bearer ${localStorage.getItem("jwt")}` },
@@ -68,19 +78,12 @@ const checkAuth = async () => {
       }
     );
 
-    if (res.data.status !== 200) {
-      // Token hết hạn, thử refresh
-      await tryRefreshToken();
-      return;
-    } else {
+    if (res.data.status === 200) {
       console.log(res.data.data.userName);
       localStorage.setItem("username", res.data.data.userName);
-      return;
     }
   } catch (err) {
-    // Lỗi introspect, thử refresh
-    await tryRefreshToken();
-    console.error(err);
+    console.error("Introspect error:", err);
   }
 };
 // ...existing code...
