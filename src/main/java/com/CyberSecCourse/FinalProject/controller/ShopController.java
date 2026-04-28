@@ -105,6 +105,17 @@ public class ShopController {
             return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         }
     }
+    @GetMapping("/productId/{productId}")
+    public ResponseData<?> getShopByProduct(@RequestParam Integer productId) {
+        try{
+            return new ResponseData<>(HttpStatus.OK.value(),"Get Shop By Product Id",shopRepository.findShopByProduct(productId));
+        }
+        catch (Exception e)
+        {
+            log.error("there is an error in shop service: {}",e.getMessage());
+            return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
 
 
 }

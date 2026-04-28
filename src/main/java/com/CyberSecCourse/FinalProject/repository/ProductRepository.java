@@ -38,6 +38,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
         p.updatedAt,
         c.category_name,
         p.description,
+        p.saleVolume,
+        null,
+        null,
         null
     )
     FROM Product p
@@ -45,5 +48,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     WHERE p.currentShop.shopId = :shopId
 """)
     List<ProductResponse> findProductByShopId(@Param("shopId") int shopId);
+
+    @Query("Select p from Product p where p.category.category_id = :categoryId AND p.status = 'ACTIVE'")
+    List<Product> findProductByCategoryId(@Param("categoryId") int categoryId);
+
 
 }

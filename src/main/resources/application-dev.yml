@@ -13,7 +13,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-
+  data:
+    redis:
+      host: localhost
+      port: 6379
 springdoc:
   api-docs:
     enabled: true
@@ -30,3 +33,4 @@ server:
   port: 8036
 jwt:
   signerKey : ${jwt_signerKey}
+

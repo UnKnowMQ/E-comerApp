@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -30,9 +31,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public boolean createCart(Integer productId, String username) {
+
+
         User customer = customerRepository.findByUsername(username);
 
         Product product = productRepository.findById(productId).orElseThrow();
+        if(customer == null)
+        {
+            throw new RuntimeException("No customer found");
+        }
+        if(product == null)
+        {
+            throw new RuntimeException("No product found");
+        }
 
         Cart curCart = cartRepository.findByCustomerId(username);
         if(curCart == null) {
@@ -138,7 +149,7 @@ public class CartServiceImpl implements CartService {
              cart.getListItem().forEach(cartItem ->{
                  ProductResponse productResponse = productMapper.toResponse(cartItem.getProduct());
                  List<String> listImageUrl = productRepository.getImageByProductId(productResponse.getId());
-//                 productResponse.setImageUrl(listImageUrl.size() != 0 ? listImageUrl.get(0) : null);
+                 productResponse.setImageUrl(listImageUrl.size() != 0 ? Collections.singletonList(listImageUrl.get(0)) : null);
                  listCartItemResponse.add(CartItemResponse.builder()
                                  .productResponse(productResponse)
                                  .price(cartItem.getPrice())

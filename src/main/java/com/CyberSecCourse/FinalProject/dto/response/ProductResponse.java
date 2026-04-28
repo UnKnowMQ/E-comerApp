@@ -43,5 +43,11 @@ public class ProductResponse {
 
     private String description;
 
+    private  Integer saleVolume;
+
+    private Double rating;
+
+    private Integer numberRating;
+
     private List<String> imageUrl;
 }

@@ -7,15 +7,14 @@ import com.CyberSecCourse.FinalProject.entity.Product;
 import com.CyberSecCourse.FinalProject.entity.Shop;
 import com.CyberSecCourse.FinalProject.entity.User;
 import com.CyberSecCourse.FinalProject.mapped.ProductMapper;
+import com.CyberSecCourse.FinalProject.repository.CategoryRepository;
 import com.CyberSecCourse.FinalProject.repository.ProductRepository;
+import com.CyberSecCourse.FinalProject.repository.RatingRepository;
 import com.CyberSecCourse.FinalProject.repository.SearchRepository;
 import com.CyberSecCourse.FinalProject.service.ProductService;
 import com.CyberSecCourse.FinalProject.utils.ProductStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -32,6 +31,8 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final SearchRepository searchRepository;
+    private final CategoryRepository categoryRepository;
+    private final RatingRepository ratingRepository;
 
     private final ProductMapper productMapper;
     @Override
@@ -58,6 +59,56 @@ public class ProductServiceImpl implements ProductService {
                 .warranty(product.getWarranty())
                 .created_at(product.getCreatedAt())
                 .status(String.valueOf(ProductStatus.valueOf(product.getStatus())))
+                .saleVolume(product.getSaleVolume())
+                .rating(ratingRepository.getAverageRatingByProductId(product.getProductId())!= null? ratingRepository.getAverageRatingByProductId(product.getProductId()):5)
+                .numberRating(ratingRepository.getNumbersRatingByProductId(product.getProductId()))
+                .imageUrl(
+                        getUrlImageByProductId(product.getId()))
+                .build()).toList();
+
+        return PageResponse.builder()
+                .pageNo(pageNo)
+                .pageSize(pageSize)
+                .totalPages(products.getTotalPages())
+                .items(all)
+                .build();
+    }
+
+    public PageResponse<?> getAllProductsByCategoryId(int pageNo, int pageSize, Integer categoryId) {
+        int pa  = 0;
+
+        pa  = (pageNo > 0) ? pageNo - 1 :pa;
+
+        Pageable page = PageRequest.of(pa, pageSize);
+
+        List<Integer> childNumber = categoryRepository.listIdCategoryChild(categoryId);
+        List<Product> productFound = new ArrayList<>();
+
+        productFound.addAll(productRepository.findProductByCategoryId(categoryId));
+
+        if (!childNumber.isEmpty()) {
+            childNumber.forEach(child -> {
+                productFound.addAll(productRepository.findProductByCategoryId(child));
+            });
+        }
+
+        Page<Product> products = new PageImpl<>(productFound,page,productFound.size());
+
+        List<ProductResponse> all = products.stream().map(product -> ProductResponse.builder()
+                .productName(product.getProductName())
+//                .brand_name(product.getBrand() == null ? "" : product.getBrand().getBrand_name() )
+                .id(product.getId())
+                .price(product.getPrice())
+                .slug(product.getSlug())
+                .category_name(product.getCategory() == null ? "" : product.getCategory().getCategory_name())
+//                .discount_name(product.getDiscount() == null ? "" : product.getDiscount().getDiscount_name())
+                .quantity(product.getQuantity())
+                .warranty(product.getWarranty())
+                .created_at(product.getCreatedAt())
+                .status(String.valueOf(ProductStatus.valueOf(product.getStatus())))
+                .saleVolume(product.getSaleVolume())
+                .rating(ratingRepository.getAverageRatingByProductId(product.getProductId())!= null? ratingRepository.getAverageRatingByProductId(product.getProductId()):5)
+                .numberRating(ratingRepository.getNumbersRatingByProductId(product.getProductId()))
                 .imageUrl(
                         getUrlImageByProductId(product.getId()))
                 .build()).toList();

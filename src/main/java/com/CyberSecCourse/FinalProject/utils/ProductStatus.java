@@ -12,5 +12,7 @@ public enum ProductStatus {
     @JsonProperty("draft")
     DRAFT,
     @JsonProperty("pending")
-    PENDING;
+    PENDING,
+    @JsonProperty("rejected")
+    REJECTED;
 }

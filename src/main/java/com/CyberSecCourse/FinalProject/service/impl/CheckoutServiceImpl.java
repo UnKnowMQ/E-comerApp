@@ -6,8 +6,10 @@ import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
 import com.CyberSecCourse.FinalProject.entity.*;
 import com.CyberSecCourse.FinalProject.repository.*;
 import com.CyberSecCourse.FinalProject.service.CheckoutService;
+import com.CyberSecCourse.FinalProject.service.InvoiceRedisService;
 import com.CyberSecCourse.FinalProject.service.InvoiceService;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +43,9 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final InvoiceServiceImpl invoiceServiceImpl;
 
     private final MailServiceImpl mailService;
+
+    private final InvoiceRedisService invoiceRedisService;
+
 //
 //    @Value("${filePath}")
 //    private String filePath;
@@ -141,5 +146,99 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         return  invoiceDetail;
     }
+    @Transactional
+    public Invoice checkout(InvoiceRequest request, ProductRequestDTO productDTO) {
+
+        User user = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Invoice invoice = buildInvoice(request, user);
+        invoiceRepository.save(invoice);
+
+        if (isBuyNow(productDTO)) {
+            handleBuyNow(invoice, productDTO);
+        } else {
+            handleCartCheckout(invoice, user);
+        }
+        invoiceRedisService.scheduleCancelAfter15Min(Long.valueOf(invoice.getInvoice_id()));
+        return invoice;
+    }
+    private boolean isBuyNow(ProductRequestDTO dto) {
+        return dto != null && dto.getId() != null;
+    }
+    private Invoice buildInvoice(InvoiceRequest req, User user) {
+        return Invoice.builder()
+                .invoice_date(req.getInvoice_date())
+                .invoice_status(InvoiceStatus.valueOf("PENDING"))
+                .note(req.getNote())
+                .user(user)
+                .order_code(req.getOrder_code())
+                .total_amount(req.getTotal_amount())
+                .exprired_at(req.getExpired_at())
+                .shipping_address(req.getShipping_address())
+                .payment_method(req.getPayment_method())
+                .payment_id(req.getPayment_id())
+                .build();
+    }
+    private void handleCartCheckout(Invoice invoice, User user) {
+
+        List<CartItem> cartItems = cartItemRepository.findCartItemByCustomerId(user.getUserId());
+
+        if (cartItems.isEmpty()) {
+            throw new RuntimeException("Cart is empty");
+        }
+
+        List<InvoiceDetail> details = cartItems.stream()
+                .map(ci -> mapToDetail(ci, invoice))
+                .toList();
+
+        invoiceDetailRepository.saveAll(details);
+
+        // clear cart
+        cartItemRepository.deleteAll(cartItems);
+
+        Cart cart = cartRepository.findByCustomerId(user.getUsername());
+        if (cart != null) {
+            cart.setCartStatus("CHECKED_OUT");
+            cartRepository.save(cart);
+        }
+
+    }
+    private void handleBuyNow(Invoice invoice, ProductRequestDTO dto) {
+
+        Product product = productRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        InvoiceDetail detail = InvoiceDetail.builder()
+                .id(new InvoiceDetailId(invoice.getInvoice_id(), product.getId()))
+                .invoice(invoice)
+                .product(product)
+                .quantity(1)
+                .unitPrice(dto.getPrice())
+                .build();
+
+        invoiceDetailRepository.save(detail);
+    }
+    private InvoiceDetail mapToDetail(CartItem ci, Invoice invoice) {
+        return InvoiceDetail.builder()
+                .id(new InvoiceDetailId(invoice.getInvoice_id(), ci.getProduct().getId()))
+                .invoice(invoice)
+                .product(ci.getProduct())
+                .quantity(ci.getQuantity())
+                .unitPrice(ci.getPrice())
+                .build();
+    }
+    @Transactional
+    public void confirmPayment(Long invoiceId) {
+        Invoice invoice = invoiceRepository.findById(Math.toIntExact(invoiceId))
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+        invoice.setInvoice_status(InvoiceStatus.SHIPPING);
+        invoiceRepository.save(invoice);
+
+        // ✅ Xóa key Redis để không bị auto-cancel
+        invoiceRedisService.cancelSchedule(invoiceId);
+    }
+
 
 }

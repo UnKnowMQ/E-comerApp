@@ -19,4 +19,9 @@ public interface ShopRepository extends JpaRepository<Shop,Integer> {
 
     @Query("select s from Shop s where s.shopStatus = 'PENDING'")
     List<Shop> findShopVerifiedRequest();
+
+    @Query("select s from Shop s join Product p on p.currentShop.shopId = s.shopId WHERE p.id = :productId")
+    Shop findShopByProduct(Integer productId);
+
+
 }

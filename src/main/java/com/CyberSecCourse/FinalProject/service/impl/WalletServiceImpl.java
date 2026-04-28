@@ -7,6 +7,7 @@ import com.CyberSecCourse.FinalProject.entity.WalletTransaction;
 import com.CyberSecCourse.FinalProject.repository.WalletRepository;
 import com.CyberSecCourse.FinalProject.repository.WalletTransactionRepository;
 import com.CyberSecCourse.FinalProject.service.WalletService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class WalletServiceImpl implements WalletService {
 
 
     @Override
+    @Transactional
     public WalletTransaction depositCreating(Long UserId, BigDecimal amount, Long orderCode) {
         if (amount.compareTo(BigDecimal.ZERO) <=0 )
         {
@@ -51,6 +53,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional
     public WalletTransaction depositProcessing(Long UserId, BigDecimal amount, String transactionResult, WalletTransaction transaction) {
 
         Wallet wallet = walletRepository.findByUserId(UserId);

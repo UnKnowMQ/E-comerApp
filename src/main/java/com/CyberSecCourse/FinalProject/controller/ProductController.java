@@ -46,6 +46,23 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/category/{categoryId}")
+    public ResponseData<?> getProductsByCategory(@RequestParam(defaultValue = "0") int pageNo,
+                                       @Min(10)@RequestParam(defaultValue = "10") int pageSize,
+                                                 @RequestParam(defaultValue = "1") int categoryId
+                                                 ) {
+        try{
+
+            return new ResponseData<>(HttpStatus.OK.value(),"Get Product done",productService.getAllProductsByCategoryId(pageNo,pageSize,categoryId));
+        }
+        catch (Exception e)
+        {
+            log.error("there is an error : {}",e.getMessage());
+            return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
+
+
     @GetMapping("/get-products-multiple-searching-col")
     public ResponseData<?> getProductMultipleSearchCol( @RequestParam(defaultValue = "0") int pageNo,
                                                         @Min(10)@RequestParam(defaultValue = "10") int pageSize,
