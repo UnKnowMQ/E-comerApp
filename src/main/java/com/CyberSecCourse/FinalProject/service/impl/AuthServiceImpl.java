@@ -137,32 +137,26 @@ public class AuthServiceImpl  implements AuthService {
 
         return IntrospectiveResponse.builder()
                 .isValid(verifired && exprirationTime.after(new Date()) && !checkInvalid)
-                .fullName((String) jwt.getJWTClaimsSet().getClaim("email"))
+                .email((String) jwt.getJWTClaimsSet().getClaim("email"))
                 .customerId(Integer.parseInt(jwt.getJWTClaimsSet().getClaim("userId").toString()))
                 .userName((String) jwt.getJWTClaimsSet().getClaim("username"))
                 .role((String) jwt.getJWTClaimsSet().getClaim("scope"))
+                .phone((String) jwt.getJWTClaimsSet().getClaim("phone"))
                 .build();
     }
 
     @Override
     public long registerCustomer(RegisterRequestDTO registerRequestDTO) {
 
-        if(accountRepository.findByEmail(registerRequestDTO.getEmail()).isPresent())
-        {
+        if(accountRepository.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
             throw new RuntimeException("Email is used!");
         }
-        if(accountRepository.findByUsername(registerRequestDTO.getUsername()).isPresent())
-        {
-            throw new RuntimeException("Username is used!");
 
+        if(accountRepository.findByUsername(registerRequestDTO.getUsername()).isPresent()) {
+            throw new RuntimeException("Username is used!");
         }
 
-        Account a = Account.builder()
-                .email(registerRequestDTO.getEmail())
-                .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
-                .status("Active")
-                .build();
-
+        // 1. Tạo User trước
         User c = User.builder()
                 .email(registerRequestDTO.getEmail())
                 .phoneNumber(registerRequestDTO.getPhone())
@@ -172,21 +166,34 @@ public class AuthServiceImpl  implements AuthService {
                 .lastname(registerRequestDTO.getLastName())
                 .gender(registerRequestDTO.getGender())
                 .role("Customer")
-                .address(registerRequestDTO.getUser().getAddress()).status("Active").note(null).username(registerRequestDTO.getUsername()).avatar(null)
+                .address(registerRequestDTO.getAddress())
+                .status("Active")
+                .username(registerRequestDTO.getUsername())
                 .build();
-        a.setUserId(c.getUserId());
 
-        User customer = customerRepository.save(c);
+        User customer = customerRepository.save(c); // ✅ SAVE trước
 
-        walletService.createWallet(WalletRequestDTO.builder()
-                        .userId(Long.valueOf(c.getUserId())).balance(BigDecimal.valueOf(0)).status("ACTIVE").build()
-                );
-        a.setUserId(customer.getUserId());
+        // 2. Tạo Account sau khi đã có userId
+        Account a = Account.builder()
+                .email(registerRequestDTO.getEmail())
+                .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
+                .status("Active")
+                .userId(customer.getUserId()) // ✅ lúc này mới đúng
+                .build();
+
         accountRepository.save(a);
-        
+
+        // 3. Tạo wallet
+        walletService.createWallet(
+                WalletRequestDTO.builder()
+                        .userId(Long.valueOf(customer.getUserId()))
+                        .balance(BigDecimal.ZERO)
+                        .status("ACTIVE")
+                        .build()
+        );
+
         return customer.getUserId();
     }
-
     @Override
     public boolean logout(HttpServletRequest request) {
         try {
@@ -222,6 +229,7 @@ public class AuthServiceImpl  implements AuthService {
                 .claim("userId", account.getUserId())
                 .claim("email", account.getEmail())
                 .claim("username",user.getUsername())
+                .claim("phone", user.getPhoneNumber())
                 .jwtID(UUID.randomUUID().toString()) // rất nên có
                 .build();
 

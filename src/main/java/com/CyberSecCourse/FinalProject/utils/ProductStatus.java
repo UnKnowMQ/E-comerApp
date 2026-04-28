@@ -10,5 +10,7 @@ public enum ProductStatus {
     @JsonProperty("out_of_stock")
     OUT_OF_STOCK,
     @JsonProperty("draft")
-    DRAFT;
+    DRAFT,
+    @JsonProperty("pending")
+    PENDING;
 }

@@ -6,18 +6,19 @@ import com.CyberSecCourse.FinalProject.entity.Discount;
 import com.CyberSecCourse.FinalProject.entity.Image;
 import com.CyberSecCourse.FinalProject.utils.ProductStatus;
 import jakarta.persistence.Column;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Builder
 @Getter
 @Setter
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductResponse {
 
     private Integer id;
@@ -32,18 +33,15 @@ public class ProductResponse {
 
     private String warranty;
 
-    private ProductStatus status;
+    private String status;
 
-    private Instant updated_at;
+    private LocalDateTime updated_at;
 
-    private Instant created_at;
+    private LocalDateTime created_at;
 
     private String category_name;
 
     private String description;
 
-
-
-    private Set<Image> imageUrl;
-
+    private List<String> imageUrl;
 }

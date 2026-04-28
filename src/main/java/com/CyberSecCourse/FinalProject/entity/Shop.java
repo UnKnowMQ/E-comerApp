@@ -45,8 +45,8 @@ public class Shop {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "verified")
-    private Boolean verified;
+    @Column(name = "status")
+    private String shopStatus;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -59,6 +59,10 @@ public class Shop {
 
     @Column(name = "business_verification", nullable = false, length = 255)
     private String businessVerification;
+
+    @Column(name = "shop_address", nullable = false, length = 500)
+    private String shopAddress;
+
 
     @OneToMany(mappedBy = "currentShop")
     @ToString.Exclude

@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -65,10 +66,10 @@ public class Product{
     private String description;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "sale_volume")
     private Integer saleVolume;
@@ -81,5 +82,12 @@ public class Product{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private Shop currentShop;
+
+    @OneToMany(mappedBy = "product")
+    @ToString.Exclude
+    @JsonIgnore
+    private Set<Specification> specifications;
+
+
 
 }

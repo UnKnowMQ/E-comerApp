@@ -18,7 +18,7 @@ public class FileUploadController {
     }
 
     @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<?> uploadImage(@RequestPart("file") MultipartFile file,
                                          @RequestParam("folder") String folderName) throws IOException {
         return ResponseEntity.ok(cloudinaryService.uploadFile(file, folderName));
     }

@@ -78,7 +78,6 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseData<Long> register(@RequestBody RegisterRequestDTO registerRequestDTO) {
         try{
-            System.out.println(registerRequestDTO.getUser().getAddress());;
             Long result = authService.registerCustomer(registerRequestDTO);
             if(result == -1)
             {

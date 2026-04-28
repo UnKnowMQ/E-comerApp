@@ -3,12 +3,14 @@ package com.CyberSecCourse.FinalProject.dto.request;
 import com.CyberSecCourse.FinalProject.entity.Brand;
 import com.CyberSecCourse.FinalProject.entity.Category;
 import com.CyberSecCourse.FinalProject.entity.Image;
+import com.CyberSecCourse.FinalProject.entity.Specification;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -20,7 +22,7 @@ public class ProductShopRequestDTO {
 
     private String productName;
 
-    private Category category;
+    private Integer categoryId;
 
     private BigDecimal price;
 
@@ -32,8 +34,9 @@ public class ProductShopRequestDTO {
 
     private String description;
 
-    private Set<Image> images;
+    private Set<String> imageUrl;
 
     private Integer shopId;
 
+    private List<SpecificationRequest> specifications;
 }

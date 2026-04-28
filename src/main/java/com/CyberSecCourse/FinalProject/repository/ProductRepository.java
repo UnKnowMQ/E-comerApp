@@ -7,6 +7,7 @@ import com.CyberSecCourse.FinalProject.entity.Product;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,4 +24,26 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             " order by sum(id.quantity) desc" +
             " limit 3")
     List<ProductTopResponse> getTop3Product();
+
+    @Query("""
+    SELECT new com.CyberSecCourse.FinalProject.dto.response.ProductResponse(
+        p.id,
+        p.productName,
+        p.slug,
+        p.price,
+        p.quantity,
+        p.warranty,
+        p.status,
+        p.createdAt,
+        p.updatedAt,
+        c.category_name,
+        p.description,
+        null
+    )
+    FROM Product p
+    JOIN p.category c
+    WHERE p.currentShop.shopId = :shopId
+""")
+    List<ProductResponse> findProductByShopId(@Param("shopId") int shopId);
+
 }

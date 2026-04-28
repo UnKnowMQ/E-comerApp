@@ -28,4 +28,6 @@ public class ShopCreateRequestDTO {
         private String businessType;
 
         private String businessVerification;
+
+        private String shopAddress;
 }

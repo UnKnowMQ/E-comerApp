@@ -15,5 +15,10 @@ public interface ShopService {
     ProductResponse DeleteProductFromShop(Integer productId);
     ProductResponse EditProductInShop(Integer productId, ProductShopRequestDTO productEditRequestDTO);
     List<ProductResponse> getProductOfShop(Integer shopId);
+    List<Shop> getAllShops();
+
+    void approveShop(Integer shopId);
+
+    void rejectShop(Integer shopId);
 
 }

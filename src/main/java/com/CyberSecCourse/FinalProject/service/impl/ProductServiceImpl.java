@@ -4,6 +4,8 @@ import com.CyberSecCourse.FinalProject.dto.response.PageResponse;
 import com.CyberSecCourse.FinalProject.dto.response.ProductResponse;
 import com.CyberSecCourse.FinalProject.dto.response.ProductTopResponse;
 import com.CyberSecCourse.FinalProject.entity.Product;
+import com.CyberSecCourse.FinalProject.entity.Shop;
+import com.CyberSecCourse.FinalProject.entity.User;
 import com.CyberSecCourse.FinalProject.mapped.ProductMapper;
 import com.CyberSecCourse.FinalProject.repository.ProductRepository;
 import com.CyberSecCourse.FinalProject.repository.SearchRepository;
@@ -44,7 +46,6 @@ public class ProductServiceImpl implements ProductService {
 
         Page<Product> products = productRepository.findAll(page);
 
-
         List<ProductResponse> all = products.stream().map(product -> ProductResponse.builder()
                 .productName(product.getProductName())
 //                .brand_name(product.getBrand() == null ? "" : product.getBrand().getBrand_name() )
@@ -55,14 +56,10 @@ public class ProductServiceImpl implements ProductService {
 //                .discount_name(product.getDiscount() == null ? "" : product.getDiscount().getDiscount_name())
                 .quantity(product.getQuantity())
                 .warranty(product.getWarranty())
-                .status(ProductStatus.valueOf(product.getStatus()))
-//                .imageUrl(
-//                        product.getImages().stream()
-//                                .findFirst()
-//                                .map(img -> img.getUrl())
-//                                .orElse(null)
-//                )
-
+                .created_at(product.getCreatedAt())
+                .status(String.valueOf(ProductStatus.valueOf(product.getStatus())))
+                .imageUrl(
+                        getUrlImageByProductId(product.getId()))
                 .build()).toList();
 
         return PageResponse.builder()
@@ -97,5 +94,32 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.getTop3Product();
     }
 
+    @Override
+    public void approveProduct(Integer shopId) {
+
+        Product product = productRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getStatus().equals("ACTIVE")) {
+            throw new RuntimeException("Product already approved");
+        }
+
+        product.setStatus("ACTIVE");
+        productRepository.save(product);
+    }
+
+    @Override
+    public void rejectProduct(Integer shopId) {
+
+        Product product = productRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getStatus().equals("REJECTED")) {
+            throw new RuntimeException("Product already rejected");
+        }
+
+        product.setStatus("REJECTED");
+        productRepository.save(product);
+    }
 
 }

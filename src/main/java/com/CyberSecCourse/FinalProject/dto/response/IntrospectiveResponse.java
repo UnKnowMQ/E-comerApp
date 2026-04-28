@@ -8,8 +8,9 @@ import lombok.Getter;
 public class IntrospectiveResponse {
 
     private Boolean isValid;
-    private String fullName;
+    private String email;
     private String userName;
     private Integer customerId;
     private String role;
+    private String phone;
 }

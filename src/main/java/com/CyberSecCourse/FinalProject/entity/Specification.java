@@ -25,7 +25,11 @@ public class Specification {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "unit")
-    private String unit;
+    @Column(name = "value")
+    private String value;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id")
+    private Product product;
 
 }

@@ -20,6 +20,9 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_id")
+    private Integer id;
+
     @Column(name = "user_id")
     private Integer userId;
 
