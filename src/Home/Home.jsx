@@ -37,7 +37,25 @@ function Homepage() {
     "https://res.cloudinary.com/dhcsnzbdu/image/upload/v1759482282/PPE-LaptopRTX5000747x350_ysycjc.jpg"
   ];
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_APP_API}/category/get-category`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    })
+      .then((res) => {
+        const items = res.data?.data || [];
+        // Chỉ lấy danh mục gốc (parentId === null)
+        setCategories(items.filter(c => c.parentId === null));
+      })
+      .catch((err) => {
+        console.error("Error categories:", err);
+      });
+  }, []);
+
 useEffect(() => {
     axios.get(`${import.meta.env.VITE_APP_API}/product/get-top-product`, {
       headers: {
@@ -95,6 +113,33 @@ const handleToProductDetail = (id) => {
 					</div>
 				</div>
 			</div>
+
+      {/* Danh mục */}
+      <div className={styles.categorySection}>
+        <div className="container">
+          <div className={styles.categoryHeader}>DANH MỤC</div>
+          <div className={styles.categoryScroll}>
+            <div className={styles.categoryGrid}>
+              {categories.map((cat) => (
+                <div
+                  key={cat.category_id}
+                  className={styles.categoryItem}
+                  onClick={() => navigate(`/Products?categoryId=${cat.category_id}`)}
+                >
+                  <div className={styles.categoryImgWrap}>
+                    {cat.categoryImg ? (
+                      <img src={cat.categoryImg} alt={cat.category_name} />
+                    ) : (
+                      <i className="bi bi-grid" style={{ fontSize: 40, color: "#888" }}></i>
+                    )}
+                  </div>
+                  <span className={styles.categoryName}>{cat.category_name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="product-section">
         <div class="container">
