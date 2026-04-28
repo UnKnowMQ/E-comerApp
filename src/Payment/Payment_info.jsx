@@ -121,7 +121,7 @@ const paymentData = {
 
   }
 
-    console.log("Payment Data:", paymentData);
+    console.log("Payment Data:", paymentData.cancelUrl);
     // Thêm headers vào đây
     axios.post(
       `${import.meta.env.VITE_APP_API}/Order/create`,

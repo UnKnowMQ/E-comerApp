@@ -38,6 +38,7 @@ function Header() {
     lastName: "",
     email: "",
     date_of_birth: "",
+    address: "",
     phone: "",
     gender: "nam",
     password: "",
@@ -97,6 +98,7 @@ function Header() {
         lastName: "",
         email: "",
         date_of_birth: "",
+        address: "",
         phone: "",
         gender: "nam",
         password: "",
@@ -170,6 +172,21 @@ const checkAuth = async () => {
 						<li><a class="nav-link" href="/Products">Của hàng</a></li>
 						<li><a class="nav-link" href="about.html">About us</a></li>
 						<li><a class="nav-link" href="services.html">Dịch vụ</a></li>
+						<li>
+							<span
+								className="nav-link"
+								style={{ cursor: "pointer" }}
+								onClick={() => {
+									if (user) {
+										window.location.href = "/ShopRegister";
+									} else {
+										setShowLogin(true);
+									}
+								}}
+							>
+								Kênh người bán
+							</span>
+						</li>
 
 					</ul>
             </ul>
@@ -325,6 +342,11 @@ const checkAuth = async () => {
                 <Form.Label>Số điện thoại</Form.Label>
                 <Form.Control type="text" required value={registerForm.phone}
                   onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })} />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="registerAddress">
+                <Form.Label>Địa chỉ</Form.Label>
+                <Form.Control type="text" required value={registerForm.address}
+                  onChange={(e) => setRegisterForm({ ...registerForm, address: e.target.value })} />
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Giới tính</Form.Label>

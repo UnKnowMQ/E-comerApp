@@ -30,25 +30,3 @@ EXPOSE 80
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
 
-# ============================================
-# Optional: nginx.conf file
-# Create this file in your project root if needed
-# ============================================
-# server {
-#     listen 80;
-#     server_name localhost;
-#     
-#     root /usr/share/nginx/html;
-#     index index.html;
-#     
-#     # Handle React Router
-#     location / {
-#         try_files $uri $uri/ /index.html;
-#     }
-#     
-#     # Cache static assets
-#     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-#         expires 1y;
-#         add_header Cache-Control "public, immutable";
-#     }
-# }

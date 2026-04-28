@@ -21,6 +21,7 @@ import PaymentResult from "./Payment/Payment";
 import Cart from "./Cart/Cart";
 import Wallet from "./Wallet/wallet";
 import QRCheckout from "./QRCheckout/QRCheckout";
+import ShopRegister from "./ShopRegister/ShopRegister";
 //import NavBar from "./NavBar/NavBar";
 
 function AppContent() {
@@ -81,6 +82,9 @@ const checkAuth = async () => {
     if (res.data.status === 200) {
       console.log(res.data.data.userName);
       localStorage.setItem("username", res.data.data.userName);
+      localStorage.setItem("phone", res.data.data.phone);
+      localStorage.setItem("email", res.data.data.email);
+      localStorage.setItem("roles", res.data.data.roles.join(","));
     }
   } catch (err) {
     console.error("Introspect error:", err);
@@ -111,6 +115,7 @@ const checkAuth = async () => {
         <Route path="/Cart" element={<Cart />} />
         <Route path="/Wallet" element={<Wallet />} />
         <Route path="/QRCheckout" element={<QRCheckout />} />
+        <Route path="/ShopRegister" element={<ShopRegister />} />
 
       </Routes>
       <Footer />

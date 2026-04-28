@@ -96,30 +96,30 @@ const handleToProductDetail = (id) => {
 				</div>
 			</div>
 
-		<div class="product-section">
-			<div class="container">
-				<div class="row">
+      <div class="product-section">
+        <div class="container">
+          <div class="row">
 
-					<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-						<h2 class="mb-4 section-title">Chất lượng đảm bảo</h2>
-						<p class="mb-4">Khám phá một số sản phẩm bán chạy </p>
-					</div> 
-		  		{products.map((product) => (
-					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0" key={product.id} onClick={() => handleToProductDetail(product.id)}>
-						<a class="product-item" onClick={() => handleToProductDetail(product.id)} >
-							<img src={product.image} class="img-fluid product-thumbnail" alt={product.name}/>
-							<h3 class="product-title">{product.name}</h3>
-							<strong class="product-price">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</strong>
-							<span class="icon-cross">
-								<img src="images/cross.svg" class="img-fluid" alt="cross"/>
-							</span>
-						</a>
-					</div> 
-		  ))}
-					
+            <div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
+              <h2 class="mb-4 section-title">Chất lượng đảm bảo</h2>
+              <p class="mb-4">Khám phá một số sản phẩm bán chạy </p>
+            </div> 
+            {products.map((product) => (
+            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0" key={product.id} onClick={() => handleToProductDetail(product.id)}>
+              <a class="product-item" onClick={() => handleToProductDetail(product.id)} >
+                <img src={product.image} class="img-fluid product-thumbnail" alt={product.name}/>
+                <h3 class="product-title">{product.name}</h3>
+                <strong class="product-price">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</strong>
+                <span class="icon-cross">
+                  <img src="images/cross.svg" class="img-fluid" alt="cross"/>
+                </span>
+              </a>
+            </div> 
+        ))}
+            
 
-				</div>
-			</div>
+          </div>
+        </div>
 		</div>
 		</div>
     );
