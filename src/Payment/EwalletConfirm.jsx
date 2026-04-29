@@ -77,6 +77,7 @@ function EwalletConfirm() {
             invoiceId: checkout.invoiceId,
             checkoutStatus: res.data?.data,
             message: res.data?.message,
+            orderCode: checkout.orderCode,
           },
         });
       } else {
