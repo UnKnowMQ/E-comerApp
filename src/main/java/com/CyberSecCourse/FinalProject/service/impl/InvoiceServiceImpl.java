@@ -1,9 +1,14 @@
 package com.CyberSecCourse.FinalProject.service.impl;
 
+import com.CyberSecCourse.FinalProject.dto.response.InvoiceDetailResponse;
+import com.CyberSecCourse.FinalProject.dto.response.InvoiceResponse;
 import com.CyberSecCourse.FinalProject.entity.Invoice;
 import com.CyberSecCourse.FinalProject.entity.InvoiceDetail;
 import com.CyberSecCourse.FinalProject.repository.InvoiceDetailRepository;
+import com.CyberSecCourse.FinalProject.repository.InvoiceRepository;
 import com.CyberSecCourse.FinalProject.service.InvoiceService;
+import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.docx4j.Docx4jProperties;
 import org.docx4j.convert.out.pdf.PdfConversion;
@@ -11,10 +16,15 @@ import org.docx4j.convert.out.pdf.viaXSLFO.Conversion;
 import org.docx4j.convert.out.pdf.viaXSLFO.PdfSettings;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +34,12 @@ import java.util.Map;
 public class InvoiceServiceImpl implements InvoiceService {
 
     private  final InvoiceDetailRepository invoiceDetailRepository;
+
+    private  final InvoiceRepository invoiceRepository;
+
+
+
+
 
     @Override
     public void createInvoice(Invoice invoice) throws Exception {
@@ -91,6 +107,69 @@ public class InvoiceServiceImpl implements InvoiceService {
             conversion.output(os, pdfSettings);
         }
     }
+
+//    public List<InvoiceResponse> getInvoicesByShopId(Integer shopId) {
+//
+//        List<InvoiceResponse> result = invoiceRepository.findByShopId(shopId);
+//
+//        if (result.isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        return result;
+//    }
+
+    public Page<InvoiceResponse> getInvoicesByShopId(Integer shopId, int pageNo, int pageSize, String sortBy) {
+
+        Pageable pageable = PageRequest.of(
+                Math.max(pageNo - 1, 0),
+                pageSize,
+                Sort.by(sortBy).descending()
+        );
+
+        Page<InvoiceResponse> getByShopId = invoiceRepository.findByShopId(shopId,pageable);
+
+        getByShopId.forEach(invoice ->{
+            invoice.setDetails(
+                   invoiceDetailRepository.findByInvoiceId(invoice.getInvoiceId()).stream().map(d->
+                            InvoiceDetailResponse.builder()
+                                    .productId(d.getProduct().getId())
+                                    .productName(d.getProduct().getProductName())
+                                    .quantity(d.getQuantity())
+                                    .unitPrice(d.getUnitPrice())
+                                    .build()  ).toList());
+        });
+
+        return getByShopId;
+    }
+
+    private boolean isValidTransition(InvoiceStatus current, InvoiceStatus next) {
+
+        return switch (current) {
+            case PENDING -> next == InvoiceStatus.WFAD || next == InvoiceStatus.CANCELLED;
+            case WFAD -> next == InvoiceStatus.DELIVERY || next == InvoiceStatus.CANCELLED;
+            case RR -> next == InvoiceStatus.REFUNDED || next == InvoiceStatus.DONE;
+            case DELIVERY -> next == InvoiceStatus.DONE ;
+            default -> false;
+        };
+    }
+    @Transactional
+    public void updateInvoiceStatus(Integer invoiceId, Integer shopId, InvoiceStatus newStatus) {
+
+        Invoice invoice = invoiceRepository.findByIdAndShopId(invoiceId, shopId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found or not belong to shop"));
+
+        // 🔒 validate flow (quan trọng)
+        InvoiceStatus currentStatus = invoice.getInvoice_status();
+
+        if (!isValidTransition(currentStatus, newStatus)) {
+            throw new RuntimeException("Invalid status transition");
+        }
+
+        invoice.setInvoice_status(newStatus);
+        invoiceRepository.save(invoice);
+    }
+
 
 
 }

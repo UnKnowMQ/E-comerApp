@@ -1,23 +1,19 @@
 package com.CyberSecCourse.FinalProject.service.impl;
 
-import com.CyberSecCourse.FinalProject.dto.request.InvoiceDetailRequest;
 import com.CyberSecCourse.FinalProject.dto.request.InvoiceRequest;
 import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
+import com.CyberSecCourse.FinalProject.dto.response.InvoiceDetailResponse;
+import com.CyberSecCourse.FinalProject.dto.response.InvoiceResponse;
 import com.CyberSecCourse.FinalProject.entity.*;
 import com.CyberSecCourse.FinalProject.repository.*;
 import com.CyberSecCourse.FinalProject.service.CheckoutService;
 import com.CyberSecCourse.FinalProject.service.InvoiceRedisService;
-import com.CyberSecCourse.FinalProject.service.InvoiceService;
 import com.CyberSecCourse.FinalProject.utils.InvoiceStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +46,8 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final WalletRepository walletRepository;
 
     private final WalletTransactionRepository walletTransactionRepository;
+
+    private final ShopRepository shopRepository;
 
 //
 //    @Value("${filePath}")
@@ -118,7 +116,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         if("success".equalsIgnoreCase(status))
         {
-            checkOutInvoice.setInvoice_status(InvoiceStatus.SHIPPING);
+            checkOutInvoice.setInvoice_status(InvoiceStatus.DELIVERY);
             cartItemRepository.deleteAll(cartItemRepository.findCartItemByCustomerId(checkOutInvoice.getUser().getUserId()));
             Cart c =  cartRepository.findByCustomerId((checkOutInvoice.getUser().getUsername()));
             if(c != null)
@@ -152,7 +150,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         return  invoiceDetail;
     }
     @Transactional
-    public Invoice checkout(InvoiceRequest request, ProductRequestDTO productDTO) {
+    public InvoiceResponse checkout(InvoiceRequest request, ProductRequestDTO productDTO) {
 
         User user = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -166,12 +164,13 @@ public class CheckoutServiceImpl implements CheckoutService {
             handleCartCheckout(invoice, user);
         }
         invoiceRedisService.scheduleCancelAfter15Min(Long.valueOf(invoice.getInvoice_id()));
-        return invoice;
+        return mapToResponse(invoice);
     }
     private boolean isBuyNow(ProductRequestDTO dto) {
         return dto != null && dto.getId() != null;
     }
     private Invoice buildInvoice(InvoiceRequest req, User user) {
+        Shop shop = shopRepository.getReferenceById(req.getShopId());
         return Invoice.builder()
                 .invoice_date(req.getInvoice_date())
                 .invoice_status(InvoiceStatus.valueOf("PENDING"))
@@ -183,6 +182,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .shipping_address(req.getShipping_address())
                 .payment_method(req.getPayment_method())
                 .payment_id(req.getPayment_id())
+                .shop(shop)
                 .build();
     }
     private void handleCartCheckout(Invoice invoice, User user) {
@@ -238,19 +238,22 @@ public class CheckoutServiceImpl implements CheckoutService {
         Invoice invoice = invoiceRepository.findById(Math.toIntExact(invoiceId))
                 .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        invoice.setInvoice_status(InvoiceStatus.SHIPPING);
+        invoice.setInvoice_status(InvoiceStatus.WFAD);
         invoiceRepository.save(invoice);
 
         Set<InvoiceDetail> setInvoiceDetail = invoice.getSetInvoiceDetail();
+        log.info(setInvoiceDetail.toString());
         setInvoiceDetail.forEach((invoiceDetail -> {
             Product s = invoiceDetail.getProduct();
             s.setQuantity(s.getQuantity() - invoiceDetail.getQuantity());
+            s.setSaleVolume(s.getSaleVolume() + invoiceDetail.getQuantity());
             productRepository.save(s);
         }));
         int userid = invoiceRepository.UserIdByInvoice(Math.toIntExact(invoiceId));
         Wallet walletBuy = walletRepository.findByUserId((long) userid);
         walletBuy.setBalance(walletBuy.getBalance().subtract(invoice.getTotal_amount()));
-        Wallet walletSell = walletRepository.findByUserId((long) userid);
+        System.out.println(invoice.getShop().getUserId());
+        Wallet walletSell = walletRepository.findByUserId(Long.valueOf(invoice.getShop().getUserId()));
         walletSell.setBalance(walletSell.getBalance().add(invoice.getTotal_amount()));
         walletRepository.save(walletBuy);
         walletRepository.save(walletSell);
@@ -260,6 +263,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .amount(invoice.getTotal_amount())
                 .createdAt(LocalDateTime.now())
                 .type("BUY")
+                .status("SUCCESS")
                 .orderCode(invoice.getOrder_code())
                 .build();
         WalletTransaction walletTransactionSell = WalletTransaction.builder()
@@ -267,6 +271,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .amount(invoice.getTotal_amount())
                 .createdAt(LocalDateTime.now())
                 .type("SELL")
+                .status("SUCCESS")
                 .orderCode(invoice.getOrder_code())
                 .build();
         walletTransactionRepository.save(walletTransactionSell);
@@ -277,7 +282,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     }
 
     @Transactional
-    public Invoice handlePayment(Long invoiceId) {
+    public InvoiceStatus handlePayment(Long invoiceId) {
         if(invoiceRepository.findById(Math.toIntExact(invoiceId)).isEmpty())
         {
             throw new RuntimeException("Invoice not found");
@@ -287,8 +292,52 @@ public class CheckoutServiceImpl implements CheckoutService {
         if(walletRepository.findByUserId(Long.valueOf(invoice.getUser().getUserId())).getBalance().compareTo(invoice.getTotal_amount()) <0  ){
             throw new RuntimeException("Not enough balance");
         }
+        if(invoiceRepository.findById(Math.toIntExact(invoiceId)).get().getInvoice_status() != InvoiceStatus.PENDING){
+            throw new RuntimeException("Invoice had been proccessed!");
+        }
         confirmPayment(invoiceId);
-        return invoice;
+        return invoice.getInvoice_status();
+    }
+    public InvoiceResponse mapToResponse(Invoice invoice) {
+
+        return InvoiceResponse.builder()
+                .invoiceId(invoice.getInvoice_id())
+                .invoiceDate(invoice.getInvoice_date())
+                .totalAmount(invoice.getTotal_amount())
+                .paymentMethod(invoice.getPayment_method())
+                .shippingAddress(invoice.getShipping_address())
+                .status(invoice.getInvoice_status())
+                .note(invoice.getNote())
+                .orderCode(invoice.getOrder_code())
+                .paymentId(invoice.getPayment_id())
+                .expiredAt(invoice.getExprired_at())
+
+                // user
+                .userId(invoice.getUser().getUserId())
+                .username(invoice.getUser().getUsername())
+
+                // shop
+                .shopId(invoice.getShop().getShopId())
+                .shopName(invoice.getShop().getShopName())
+                .details(invoiceDetailRepository.findByInvoiceId(invoice.getInvoice_id()).stream().map(d->
+                         InvoiceDetailResponse.builder()
+                                        .productId(d.getProduct().getId())
+                                        .productName(d.getProduct().getProductName())
+                                        .quantity(d.getQuantity())
+                                        .unitPrice(d.getUnitPrice())
+                                        .build()  ).toList())
+                // details
+//                .details(
+//                        invoice.getSetInvoiceDetail().stream()
+//                                .map(d -> InvoiceDetailResponse.builder()
+//                                        .productId(d.getProduct().getId())
+//                                        .productName(d.getProduct().getProductName())
+//                                        .quantity(d.getQuantity())
+//                                        .unitPrice(d.getUnitPrice())
+//                                        .build())
+//                                .toList()
+//                )
+                .build();
     }
 
 }

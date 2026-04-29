@@ -43,4 +43,6 @@ public class InvoiceRequest {
 
     private Instant expired_at;
 
+    private Integer shopId;
+
 }

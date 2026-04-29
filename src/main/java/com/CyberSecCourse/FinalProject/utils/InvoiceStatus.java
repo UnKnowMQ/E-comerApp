@@ -2,16 +2,4 @@ package com.CyberSecCourse.FinalProject.utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum InvoiceStatus {
-    @JsonProperty("pending")
-    PENDING,
-    @JsonProperty("cancelled")
-    CANCELLED,
-    @JsonProperty("shipping")
-    SHIPPING,
-    @JsonProperty("delivered")
-    DELIVERED,
-    @JsonProperty("refunded")
-    REFUNDED;
-
-}
+public enum InvoiceStatus { @JsonProperty("pending") PENDING, @JsonProperty("wfad") WFAD, @JsonProperty("cancelled") CANCELLED, @JsonProperty("delivery") DELIVERY, @JsonProperty("done") DONE, @JsonProperty("rr") RR, @JsonProperty("refunded") REFUNDED; }

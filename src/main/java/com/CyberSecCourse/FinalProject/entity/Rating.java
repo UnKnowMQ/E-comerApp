@@ -25,7 +25,7 @@ public class Rating {
     private Float rate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "c_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "product_id", nullable = false, length = 255)

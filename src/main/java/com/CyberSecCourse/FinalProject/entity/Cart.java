@@ -32,7 +32,7 @@ public class Cart {
     private String cartStatus;
 
     @ManyToOne
-    @JoinColumn(name = "c_id")
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
 
