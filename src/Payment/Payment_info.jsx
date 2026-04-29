@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import styles from '../Payment/Payment_info.module.css';
 import pic from '../assets/vite-vite-logo.png';
 import { FaPlus, FaMinus, FaUser } from "react-icons/fa";
@@ -17,6 +17,8 @@ import { useNavigate } from "react-router-dom";
 function PaymentInfo() {
     const { setShowLogin } = useContext(ModalContext);
 
+  const navigate = useNavigate();
+
 const [username, setUsername] = useState(localStorage.getItem("username") || "Guest");
   const [comboCounts, setComboCounts] = useState({
     beta: 0,
@@ -34,6 +36,7 @@ const [username, setUsername] = useState(localStorage.getItem("username") || "Gu
   };
 
   const [products, setProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
   const location = useLocation();
 
   const [firstName, setFirstName] = useState("");
@@ -44,12 +47,22 @@ const [username, setUsername] = useState(localStorage.getItem("username") || "Gu
   const [totalPrice, setTotalPrice] = useState(0);
   const [productName, setProductName] = useState("");
   const [paymentType, setPaymentType] = useState("QRPAY");
+  const [shopId, setShopId] = useState(null);
+  const [multiShopCart, setMultiShopCart] = useState(false);
   
 
   const { id } = location.state || {};
+  const isSingleProduct = id !== undefined;
 
-  
-  let total = 0;
+  const total = useMemo(() => {
+    if (isSingleProduct) {
+      return (products || []).reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+    }
+    return (cartItems || []).reduce(
+      (sum, item) => sum + (Number(item.productResponse?.price) || 0) * (Number(item.quantity) || 0),
+      0
+    );
+  }, [isSingleProduct, products, cartItems]);
 
   console.log("Product ID from state:", id);
 useEffect(() => {
@@ -68,14 +81,93 @@ useEffect(() => {
       .catch((err) => {
         console.error("Error products:", err);
       });
+
+    axios.get(`${import.meta.env.VITE_APP_API}/shop/productId/${id}`, {
+      params: { productId: id },
+      headers: {
+        accept: "*/*",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        setShopId(res.data?.data?.shopId ?? null);
+      })
+      .catch((err) => {
+        console.error("Error shop by productId:", err);
+        setShopId(null);
+      });
     }
   }, [id]);
-  if(id !== undefined) {
-  products.forEach(product => {
-    total += product.price;
-  });
-  console.log("Total price:", total);
-}
+
+  useEffect(() => {
+    if (id !== undefined) return;
+
+    axios.get(`${import.meta.env.VITE_APP_API}/cart/get-cart-by-customer-id`, {
+      params: { customerId: localStorage.getItem("username") },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    })
+      .then((res) => {
+        const items = res.data?.data || [];
+        setCartItems(items);
+      })
+      .catch((err) => {
+        console.error("Error cart:", err);
+        setCartItems([]);
+      });
+  }, [id]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (id !== undefined) return;
+    if (!cartItems || cartItems.length === 0) {
+      setShopId(null);
+      setMultiShopCart(false);
+      return;
+    }
+
+    // checkout hiện chỉ hỗ trợ 1 shopId, nên kiểm tra giỏ hàng có nhiều shop không
+    const productIds = cartItems
+      .map((x) => x?.productResponse?.id)
+      .filter(Boolean);
+
+    const fetchShopIds = async () => {
+      try {
+        const results = await Promise.all(
+          productIds.map((pid) =>
+            axios.get(`${import.meta.env.VITE_APP_API}/shop/productId/${pid}`, {
+              params: { productId: pid },
+              headers: {
+                accept: "*/*",
+                Authorization: `Bearer ${token}`,
+              },
+            })
+          )
+        );
+
+        const ids = results
+          .map((r) => r.data?.data?.shopId)
+          .filter((x) => x !== null && x !== undefined);
+
+        const unique = Array.from(new Set(ids));
+        if (unique.length === 1) {
+          setShopId(unique[0]);
+          setMultiShopCart(false);
+        } else {
+          setShopId(null);
+          setMultiShopCart(true);
+        }
+      } catch (err) {
+        console.error("Error shopId from cart:", err);
+        setShopId(null);
+        setMultiShopCart(false);
+      }
+    };
+
+    fetchShopIds();
+  }, [id, cartItems]);
 
 // ...existing code...
 const  handleToPayment = (e) => {
@@ -84,6 +176,62 @@ const  handleToPayment = (e) => {
       setShowLogin(true);
       return;
     }
+
+    // Thanh toán bằng Ví EWallet
+    if (paymentType === "EWALLET") {
+      if (!shopId) {
+        if (multiShopCart) {
+          alert("Giỏ hàng có sản phẩm từ nhiều shop. Vui lòng thanh toán từng shop.");
+          return;
+        }
+        alert("Không lấy được shopId để checkout. Vui lòng thử lại.");
+        return;
+      }
+
+      const token = localStorage.getItem("jwt");
+      const expiredAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      const orderCode = Math.floor(Date.now() * 1000 + Math.random() * 1000);
+      const paymentId = `ew_${Math.random().toString(36).slice(2, 12)}`;
+
+      const payload = {
+        invoiceRequest: {
+          invoice_id: Math.floor(Math.random() * 2147483647),
+          invoice_date: new Date().toISOString().slice(0, 10),
+          total_amount: total,
+          payment_method: "EWALLET",
+          shipping_address: address,
+          invoice_status: "pending",
+          note: "Thanh toán đơn hàng",
+          order_code: orderCode,
+          payment_id: paymentId,
+          customerId: Number(localStorage.getItem("customerId")),
+          expired_at: expiredAt,
+          shopId: shopId,
+        },
+      };
+
+      axios
+        .post(`${import.meta.env.VITE_APP_API}/checkout`, payload, {
+          headers: {
+            accept: "*/*",
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          if (res.data?.status === 200) {
+            navigate("/EwalletConfirm", { state: { checkout: res.data.data } });
+          } else {
+            alert(res.data?.message || "Checkout thất bại");
+          }
+        })
+        .catch((err) => {
+          console.error("Error checkout:", err);
+          alert(err.response?.data?.message || err.message || "Checkout thất bại");
+        });
+      return;
+    }
+
 const paymentData = {
       productName : products[0].productName,
       description : "Thanh toan don hang",
@@ -146,36 +294,9 @@ const paymentData = {
         alert("An error occurred while processing your payment. Please try again.");
       });
   };
-
-  
+    
+    
 // ...existing code...
-
-  if(id === undefined) {
-      useEffect(() => {
-    // Clear previous products before fetching new one
-    setProducts([]);
-    axios.get(`${import.meta.env.VITE_APP_API}/cart/get-cart-by-customer-id`, {
-      params: { customerId : localStorage.getItem("username") },
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-      },
-
-    })
-      .then((res) => {
-        const items = res.data?.data || [];
-        setProducts(items);
-        console.log("Products in payment info:", items);
-        })
-      .catch((err) => {
-        console.error("Error products:", err);
-      });
-  }, [id]);
-  products.forEach(product => {
-    total += product.price;
-  });
-
-  }
     const paymentTypeChange = (event) => {
     setPaymentType(event.target.value);
   }
@@ -204,7 +325,7 @@ const paymentData = {
       </li>
     ))
   ) : (
-    products.map((item) => (
+    cartItems.map((item) => (
       <li key={item.productResponse.id} className="list-group-item d-flex justify-content-between lh-sm">
         <div>
           <h6 className="my-0">{item.productResponse.productName} x {item.quantity}</h6>
@@ -297,8 +418,8 @@ const paymentData = {
               <label className="form-check-label" for="credit">Ship COD</label>
             </div>
             <div className="form-check">
-              <input id="debit" name="paymentMethod" type="radio" className="form-check-input"  onChange={paymentTypeChange} value={"QRPAY"} required/>
-              <label className="form-check-label" for="debit">QR Pay</label>
+              <input id="debit" name="paymentMethod" type="radio" className="form-check-input"  onChange={paymentTypeChange} value={"EWALLET"} required/>
+              <label className="form-check-label" for="debit">Ví EWallet</label>
             </div>
 
           </div>

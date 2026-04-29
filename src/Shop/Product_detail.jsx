@@ -93,77 +93,59 @@ function Product_detail() {
 
   
  
-  const handleToInstantBuy = async () => {
-  const token = localStorage.getItem("jwt");
+  const addToCart = async () => {
+    const token = localStorage.getItem("jwt");
+    const customerId = localStorage.getItem("username");
 
-  try {
-    const kq = await axios.post(
-      `${import.meta.env.VITE_APP_API}/auth/introspect`,
-      {},
-      {
-        headers: {
-          "accept": "*/*",
-          "Authorization": `Bearer ${token}`
+    if (!customerId || customerId === 'Unknown') {
+      setShowLogin(true);
+      return false;
+    }
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_APP_API}/cart/create-cart`,
+        {},
+        {
+          params: {
+            customerId,
+            productId: id,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
         }
-      }
-    );
+      );
 
-    console.log("Instant Buy clicked");
+      return res.status === 200;
+    } catch (err) {
+      console.error("Lỗi thêm vào giỏ hàng:", err);
+      setShowLogin(true);
+      return false;
+    }
+  };
 
-    if (kq.status === 200) {
-      navigate('/Payment_info', { state: { id } });
+  const handleToInstantBuy = async () => {
+    // Mua ngay = thêm vào giỏ hàng rồi chuyển sang trang giỏ hàng
+    const ok = await addToCart();
+    if (ok) {
+      navigate('/Cart');
     } else {
       window.alert("Vui lòng đăng nhập để mua hàng");
-      setShowLogin(true);
     }
-  } catch (err) {
-    console.error("Lỗi introspect:", err);
-    window.alert("Vui lòng đăng nhập để mua hàng");
-    setShowLogin(true);
-  }
-};
+  };
 const carouselId = 'productCarousel';
 
   // nếu dùng SSR, chặn render trên server
   if (typeof window === 'undefined') return null; 
 
  const handleToCart = async () => {
-     const token = localStorage.getItem("jwt");
-     const customerId = localStorage.getItem("username");
-
-     // Nếu chưa login hoặc customerId không hợp lệ -> yêu cầu login
-     if (!customerId || customerId === 'Unknown') {
-       window.alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
-       setShowLogin(true);
-       return;
-     }
-
-     try {
-       const res = await axios.post(
-         `${import.meta.env.VITE_APP_API}/cart/create-cart`,
-         {}, // body
-         {
-           params: {
-             customerId,
-             productId: id
-           },
-           headers: {
-             "Content-Type": "application/json",
-             "Authorization": `Bearer ${token}`
-           }
-         }
-       );
-
-       if (res.status === 200) {
-         window.alert("Thêm vào giỏ hàng thành công");
-       } else {
-         window.alert("Thêm vào giỏ hàng thất bại");
-       }
-     } catch (err) {
-       console.error("Lỗi thêm vào giỏ hàng:", err);
-       window.alert("Đã xảy ra lỗi. Vui lòng thử lại.");
-       // nếu lỗi do auth, bật modal login
-       setShowLogin(true);
+     const ok = await addToCart();
+     if (ok) {
+       window.alert("Thêm vào giỏ hàng thành công");
+     } else {
+       window.alert("Thêm vào giỏ hàng thất bại");
      }
    };
 

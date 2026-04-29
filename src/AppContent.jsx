@@ -22,6 +22,7 @@ import Cart from "./Cart/Cart";
 import Wallet from "./Wallet/wallet";
 import QRCheckout from "./QRCheckout/QRCheckout";
 import ShopRegister from "./ShopRegister/ShopRegister";
+import EwalletConfirm from "./Payment/EwalletConfirm";
 //import NavBar from "./NavBar/NavBar";
 
 function AppContent() {
@@ -112,6 +113,7 @@ const checkAuth = async () => {
         <Route path="/up" element={<Up />} />
         <Route path="/Filter" element={<Filter />} />
         <Route path="/PaymentResult" element={<PaymentResult />} />
+        <Route path="/EwalletConfirm" element={<EwalletConfirm />} />
         <Route path="/Cart" element={<Cart />} />
         <Route path="/Wallet" element={<Wallet />} />
         <Route path="/QRCheckout" element={<QRCheckout />} />
