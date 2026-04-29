@@ -1,0 +1,81 @@
+.link-muted { color: #aaa; } .link-muted:hover { color: #1266f1; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 800px;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.date-list {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.date-list div.active {
+  color: blue;
+  border-bottom: 2px solid blue;
+}
+
+.showtimes {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.showtime {
+  background: #f1f1f1;
+  border-radius: 5px;
+  text-align: center;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  width: 120px;
+  cursor: pointer;
+}
+
+.showtime .time {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.showtime .seats {
+  font-size: 11px;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-box table th,
+.modal-box table td {
+  font-size: 16px;
+  vertical-align: middle;
+}
+

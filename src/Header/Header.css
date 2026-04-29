@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+
+}
+
+.topblack {
+    height: 40px;
+    width: 100%;
+    background-color: black;
+}
+
+.nav-link {
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #ff5722 !important;    /* đổi màu chữ khi hover */
+}
+
+.navbar-brand:hover {
+  cursor: pointer;
+}
