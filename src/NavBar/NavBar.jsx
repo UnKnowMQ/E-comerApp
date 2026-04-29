@@ -38,6 +38,12 @@ function NavBar(){
         </a>
       </li>
        <li className="nav-item">
+        <a className="nav-link" href="/ShopOrders" style={{fontSize: 'small'}}>
+          <i className="bi bi-receipt"></i>
+  Đơn hàng của shop
+        </a>
+      </li>
+       <li className="nav-item">
         <a className="nav-link" href="/Member" style={{fontSize: 'small'}}>
           <i className="bi bi-people-fill"></i>
   Quản lý thông tin khách hàng

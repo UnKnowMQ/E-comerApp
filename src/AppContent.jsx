@@ -21,6 +21,7 @@ import NavBar from "./NavBar/NavBar";
 import Product_edit from "./Products/Products_edit";
 import Shop from "./Shop/Shop";  
 import ShopVerification from "./Shop/Shop_Verification";
+import ShopOrders from "./Shop/ShopOrders";
 import ShopProducts from "./Products/ShopProducts";
 import ShopProduct_add from "./Products/ShopProduct_add";
 import ProductApproval from "./Products/ProductApproval";
@@ -205,6 +206,7 @@ useEffect(() => {
         <Route path="/Products_edit" element={<Product_edit />} />
         <Route path="/Shop" element={<Shop />} />
         <Route path="/Shop_Verification" element={<ShopVerification />} />
+        <Route path="/ShopOrders" element={<ShopOrders />} />
         <Route path="/ShopProducts" element={<ShopProducts />} />
         <Route path="/ShopProduct_add" element={<ShopProduct_add />} />
         <Route path="/ProductApproval" element={<ProductApproval />} />
