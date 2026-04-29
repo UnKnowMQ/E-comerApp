@@ -32,4 +32,5 @@ public interface WalletRepository  extends JpaRepository<Wallet, Integer> {
     GROUP BY w.walletId, w.userId, w.balance, w.status, u.firstname, u.email, u.phoneNumber
 """)
     WalletInformationResponse findWalletInformationByUserId(@Param("userId") Integer userId);
+
 }

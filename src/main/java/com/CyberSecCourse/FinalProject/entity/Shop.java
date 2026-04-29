@@ -68,4 +68,9 @@ public class Shop {
     @ToString.Exclude
     @JsonIgnore
     private Set<Product> listProduct;
+
+    @OneToMany(mappedBy = "shop")
+    @ToString.Exclude
+    @JsonIgnore
+    private Set<Invoice> listInvoicce;
 }

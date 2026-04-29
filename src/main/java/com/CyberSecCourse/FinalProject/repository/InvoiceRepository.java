@@ -14,4 +14,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice,Integer> {
     @Query("select i from Invoice i where i.order_code = :orderCode")
     Optional<Invoice> findInvoiceByOrderCode(Long orderCode);
 
+    @Query("select i.user.userId from Invoice i WHERE i.invoice_id = :invoiceId")
+    Integer UserIdByInvoice(int invoiceId );
+
 }

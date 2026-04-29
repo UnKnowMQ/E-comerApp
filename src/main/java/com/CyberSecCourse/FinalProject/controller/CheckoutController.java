@@ -1,5 +1,6 @@
 package com.CyberSecCourse.FinalProject.controller;
 
+import com.CyberSecCourse.FinalProject.dto.request.CheckoutRequest;
 import com.CyberSecCourse.FinalProject.dto.request.InvoiceRequest;
 import com.CyberSecCourse.FinalProject.dto.request.ProductRequestDTO;
 import com.CyberSecCourse.FinalProject.dto.response.ResponseData;
@@ -22,11 +23,24 @@ public class CheckoutController {
     private final CheckoutServiceImpl checkoutService;
 
     @PostMapping("")
-    public ResponseData<?> createCheckoutAction(@RequestBody ProductRequestDTO productRequestDTO,@RequestBody InvoiceRequest invoiceRequest
+    public ResponseData<?> createCheckoutAction(@RequestBody CheckoutRequest checkoutRequest
     ) {
         try{
 
-            return new ResponseData<>(HttpStatus.OK.value(),"Check out !",checkoutService.checkout(invoiceRequest,productRequestDTO));
+            return new ResponseData<>(HttpStatus.OK.value(),"Check out !",checkoutService.checkout(checkoutRequest.getInvoiceRequest(),checkoutRequest.getProductRequest()));
+        }
+        catch (Exception e)
+        {
+            log.error("there is an error in checkout service: {}",e.getMessage());
+            return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        }
+    }
+    @PostMapping("/wallet")
+    public ResponseData<?> handleCheckoutAction(@RequestBody Integer invoiceId
+    ) {
+        try{
+
+            return new ResponseData<>(HttpStatus.OK.value(),"Check out handle !",checkoutService.handlePayment(Long.valueOf(invoiceId)));
         }
         catch (Exception e)
         {

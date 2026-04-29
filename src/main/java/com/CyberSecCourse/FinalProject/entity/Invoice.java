@@ -65,6 +65,9 @@ public class Invoice {
     private Set<InvoiceDetail> setInvoiceDetail  = new HashSet<>();
 
 
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
 
 
 

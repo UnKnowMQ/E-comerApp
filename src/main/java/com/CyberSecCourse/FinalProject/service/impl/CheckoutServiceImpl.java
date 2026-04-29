@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,6 +46,10 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final MailServiceImpl mailService;
 
     private final InvoiceRedisService invoiceRedisService;
+
+    private final WalletRepository walletRepository;
+
+    private final WalletTransactionRepository walletTransactionRepository;
 
 //
 //    @Value("${filePath}")
@@ -236,9 +241,54 @@ public class CheckoutServiceImpl implements CheckoutService {
         invoice.setInvoice_status(InvoiceStatus.SHIPPING);
         invoiceRepository.save(invoice);
 
+        Set<InvoiceDetail> setInvoiceDetail = invoice.getSetInvoiceDetail();
+        setInvoiceDetail.forEach((invoiceDetail -> {
+            Product s = invoiceDetail.getProduct();
+            s.setQuantity(s.getQuantity() - invoiceDetail.getQuantity());
+            productRepository.save(s);
+        }));
+        int userid = invoiceRepository.UserIdByInvoice(Math.toIntExact(invoiceId));
+        Wallet walletBuy = walletRepository.findByUserId((long) userid);
+        walletBuy.setBalance(walletBuy.getBalance().subtract(invoice.getTotal_amount()));
+        Wallet walletSell = walletRepository.findByUserId((long) userid);
+        walletSell.setBalance(walletSell.getBalance().add(invoice.getTotal_amount()));
+        walletRepository.save(walletBuy);
+        walletRepository.save(walletSell);
+
+        WalletTransaction walletTransactionBuy = WalletTransaction.builder()
+                .wallet(walletBuy)
+                .amount(invoice.getTotal_amount())
+                .createdAt(LocalDateTime.now())
+                .type("BUY")
+                .orderCode(invoice.getOrder_code())
+                .build();
+        WalletTransaction walletTransactionSell = WalletTransaction.builder()
+                .wallet(walletSell)
+                .amount(invoice.getTotal_amount())
+                .createdAt(LocalDateTime.now())
+                .type("SELL")
+                .orderCode(invoice.getOrder_code())
+                .build();
+        walletTransactionRepository.save(walletTransactionSell);
+        walletTransactionRepository.save(walletTransactionBuy);
+
         // ✅ Xóa key Redis để không bị auto-cancel
         invoiceRedisService.cancelSchedule(invoiceId);
     }
 
+    @Transactional
+    public Invoice handlePayment(Long invoiceId) {
+        if(invoiceRepository.findById(Math.toIntExact(invoiceId)).isEmpty())
+        {
+            throw new RuntimeException("Invoice not found");
+        }
+        Invoice invoice = invoiceRepository.getReferenceById(Math.toIntExact(invoiceId));
+
+        if(walletRepository.findByUserId(Long.valueOf(invoice.getUser().getUserId())).getBalance().compareTo(invoice.getTotal_amount()) <0  ){
+            throw new RuntimeException("Not enough balance");
+        }
+        confirmPayment(invoiceId);
+        return invoice;
+    }
 
 }
