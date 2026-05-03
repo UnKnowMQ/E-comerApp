@@ -38,13 +38,25 @@ function Homepage() {
   ];
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [countdown, setCountdown] = useState({ h: 0, m: 0, s: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
+    const calc = () => {
+      const now = new Date();
+      const end = new Date();
+      end.setHours(23, 59, 59, 0);
+      const diff = Math.max(0, Math.floor((end - now) / 1000));
+      return { h: Math.floor(diff / 3600), m: Math.floor((diff % 3600) / 60), s: diff % 60 };
+    };
+    setCountdown(calc());
+    const timer = setInterval(() => setCountdown(calc()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     axios.get(`${import.meta.env.VITE_APP_API}/category/get-category`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
+     
     })
       .then((res) => {
         const items = res.data?.data || [];
@@ -57,9 +69,9 @@ function Homepage() {
   }, []);
 
 useEffect(() => {
-    axios.get(`${import.meta.env.VITE_APP_API}/product/get-top-product`, {
+    axios.get(`${import.meta.env.VITE_APP_API}/product/get-top-product?limit=10`, {
       headers: {
-        "Content-Type": "application/json",
+        "accept": "*/*",
       },
     })
       .then((res) => {
@@ -141,31 +153,45 @@ const handleToProductDetail = (id) => {
         </div>
       </div>
 
-      <div class="product-section">
-        <div class="container">
-          <div class="row">
-
-            <div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-              <h2 class="mb-4 section-title">Chất lượng đảm bảo</h2>
-              <p class="mb-4">Khám phá một số sản phẩm bán chạy </p>
-            </div> 
+      {/* Flash Sale Section */}
+      <div className={styles.flashSaleSection}>
+        <div className="container">
+          <div className={styles.flashSaleHeader}>
+            <div className={styles.flashSaleTitle}>
+              <span className={styles.flashIcon}>⚡</span>
+              <span className={styles.flashText}>FLASH</span>
+              <span className={styles.saleText}>&nbsp;SALE</span>
+              <div className={styles.countdown}>
+                <span className={styles.countBox}>{String(countdown.h).padStart(2, '0')}</span>
+                <span className={styles.countSep}>:</span>
+                <span className={styles.countBox}>{String(countdown.m).padStart(2, '0')}</span>
+                <span className={styles.countSep}>:</span>
+                <span className={styles.countBox}>{String(countdown.s).padStart(2, '0')}</span>
+              </div>
+            </div>
+            <a href="/Products" className={styles.viewAll}>Xem tất cả &gt;</a>
+          </div>
+          <div className={styles.flashSaleScroll}>
             {products.map((product) => (
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0" key={product.id} onClick={() => handleToProductDetail(product.id)}>
-              <a class="product-item" onClick={() => handleToProductDetail(product.id)} >
-                <img src={product.image} class="img-fluid product-thumbnail" alt={product.name}/>
-                <h3 class="product-title">{product.name}</h3>
-                <strong class="product-price">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</strong>
-                <span class="icon-cross">
-                  <img src="images/cross.svg" class="img-fluid" alt="cross"/>
-                </span>
-              </a>
-            </div> 
-        ))}
-            
-
+              <div key={product.id} className={styles.flashCard} onClick={() => handleToProductDetail(product.id)}>
+                <div className={styles.flashImgWrap}>
+                  <img src={product.img || product.image} alt={product.name} className={styles.flashImg} />
+                  <span className={styles.likedBadge}>Yêu thích</span>
+                  {product.discount != null && (
+                    <span className={styles.discountBadge}>-{product.discount}%</span>
+                  )}
+                </div>
+                <div className={styles.flashCardBody}>
+                  <div className={styles.flashPrice}>
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                  </div>
+                  <button className={styles.hotBtn}>ĐANG BÁN CHẠY</button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-		</div>
+      </div>
 		</div>
     );
 

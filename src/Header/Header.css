@@ -12,6 +12,7 @@
 
 .nav-link {
   transition: all 0.3s ease;
+  font-size: 16px !important;
 }
 
 .nav-link:hover {

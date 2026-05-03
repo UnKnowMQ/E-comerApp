@@ -142,3 +142,206 @@
   word-break: break-word;
   transition: color 0.15s;
 }
+
+/* ===== Flash Sale Section ===== */
+.flashSaleSection {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin: 18px 0;
+  padding: 0;
+}
+
+.flashSaleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid #efefef;
+}
+
+.flashSaleTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flashIcon {
+  font-size: 22px;
+  color: #ee4d2d;
+}
+
+.flashText {
+  font-weight: 900;
+  font-size: 20px;
+  color: #ee4d2d;
+  font-style: italic;
+  letter-spacing: -0.5px;
+}
+
+.saleText {
+  font-weight: 900;
+  font-size: 20px;
+  color: #333;
+  font-style: italic;
+}
+
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+}
+
+.countBox {
+  background: #222;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 3px;
+  padding: 2px 6px;
+  min-width: 28px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.countSep {
+  color: #222;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.viewAll {
+  color: #ee4d2d;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.viewAll:hover {
+  text-decoration: underline;
+  color: #ee4d2d;
+}
+
+.flashSaleScroll {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  padding: 12px 8px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+}
+
+.flashSaleScroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.flashSaleScroll::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 2px;
+}
+
+.flashCard {
+  flex: 0 0 170px;
+  width: 170px;
+  cursor: pointer;
+  border-right: 1px solid #f0f0f0;
+  padding: 0 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.15s;
+}
+
+.flashCard:last-child {
+  border-right: none;
+}
+
+.flashCard:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.flashImgWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.flashImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+
+.flashCard:hover .flashImg {
+  transform: scale(1.04);
+}
+
+.likedBadge {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  background: #fff;
+  color: #ee4d2d;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid #ee4d2d;
+  border-left: none;
+  padding: 1px 6px 1px 4px;
+  border-radius: 0 3px 3px 0;
+  line-height: 1.6;
+  z-index: 1;
+}
+
+.discountBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ee4d2d;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 3px;
+  padding: 2px 5px;
+  z-index: 1;
+}
+
+.flashCardBody {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 0;
+  gap: 8px;
+}
+
+.flashPrice {
+  color: #ee4d2d;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+}
+
+.hotBtn {
+  background: linear-gradient(to right, #f97316, #ee4d2d);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.hotBtn:hover {
+  opacity: 0.88;
+}

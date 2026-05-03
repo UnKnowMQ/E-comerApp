@@ -39,13 +39,7 @@ function Wallet () {
     const [depositAmount, setDepositAmount] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('credit-card');
-    const [transactions, setTransactions] = useState([
-        { id: 1, type: 'deposit', amount: 500, date: '2026-04-15', status: 'success', method: 'Credit Card' },
-        { id: 2, type: 'purchase', amount: -150.50, date: '2026-04-14', status: 'success', method: 'Wallet Balance' },
-        { id: 3, type: 'deposit', amount: 1000, date: '2026-04-10', status: 'success', method: 'Bank Transfer' },
-        { id: 4, type: 'withdrawal', amount: -200, date: '2026-04-08', status: 'success', method: 'Bank Account' },
-        { id: 5, type: 'purchase', amount: -249.99, date: '2026-04-05', status: 'success', method: 'Wallet Balance' },
-    ]);
+    const [transactions, setTransactions] = useState([]);
 
     useEffect(() => {
         const fetchWalletBalance = async () => {
@@ -79,6 +73,24 @@ function Wallet () {
                         totalDeposit: data.totalDeposit || 0,
                         totalSpend: data.totalSpend || 0
                     });
+
+                    // Fetch transaction history
+                    if (data.walletId) {
+                        const txRes = await axios.get(
+                            `${import.meta.env.VITE_APP_API}/wallet-transaction`,
+                            {
+                                params: { walletId: data.walletId },
+                                headers: {
+                                    'accept': '*/*',
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            }
+                        );
+                        console.log('Transactions response:', txRes.data);
+                        if (txRes.data?.data) {
+                            setTransactions(txRes.data.data);
+                        }
+                    }
                 } catch (error) {
                     console.error('Error fetching wallet balance:', error);
                 }
@@ -88,6 +100,17 @@ function Wallet () {
         };
         fetchWalletBalance();
     }, []);
+
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
+
+    useEffect(() => {
+        const tp = Math.max(1, Math.ceil(transactions.length / pageSize));
+        if (page > tp) setPage(tp);
+    }, [transactions]);
+
+    const totalPages = Math.max(1, Math.ceil(transactions.length / pageSize));
+    const paginatedTransactions = transactions.slice((page - 1) * pageSize, page * pageSize);
 
     const handleDeposit = async () => {
         if (depositAmount && parseFloat(depositAmount) > 0) {
@@ -189,7 +212,7 @@ function Wallet () {
                         <div className="row">
                             <div className="col-md-4 mb-3">
                                 <div className="card border-0 shadow-sm h-100" style={{borderRadius: '10px'}}>
-                                    <div className="card-body text-center">
+                                    <div className="card-body text-center" style={{paddingTop: '3rem'}}>
                                         <i className="bi bi-arrow-down-circle text-success" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
                                         <h6 className="card-title">Tổng Nạp</h6>
                                         <p className="text-success fw-bold">+{walletInfo.totalDeposit.toLocaleString('vi-VN')}₫</p>
@@ -198,8 +221,8 @@ function Wallet () {
                             </div>
                             <div className="col-md-4 mb-3">
                                 <div className="card border-0 shadow-sm h-100" style={{borderRadius: '10px'}}>
-                                    <div className="card-body text-center">
-                                        <i className="bi bi-arrow-up-circle text-danger" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
+                                    <div className="card-body text-center" style={{paddingTop: '3rem'}}>
+                                        <i className="bi bi-arrow-up-circle text-danger mt-2" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
                                         <h6 className="card-title">Tổng Chi</h6>
                                         <p className="text-danger fw-bold">-{walletInfo.totalSpend.toLocaleString('vi-VN')}₫</p>
                                     </div>
@@ -207,7 +230,7 @@ function Wallet () {
                             </div>
                             <div className="col-md-4 mb-3">
                                 <div className="card border-0 shadow-sm h-100" style={{borderRadius: '10px'}}>
-                                    <div className="card-body text-center">
+                                    <div className="card-body text-center" style={{paddingTop: '3rem'}}>
                                         <i className="bi bi-credit-card text-primary" style={{fontSize: '2rem', marginBottom: '10px'}}></i>
                                         <h6 className="card-title">Loại Ví</h6>
                                         <p className="text-primary fw-bold">Thường</p>
@@ -228,7 +251,7 @@ function Wallet () {
                                         <button 
                                             className={`nav-link ${activeTab === 'balance' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('balance')}
-                                            style={{borderBottom: activeTab === 'balance' ? '3px solid #667eea' : 'none', color: activeTab === 'balance' ? '#667eea' : '#666'}}
+                                            style={{borderBottom: activeTab === 'balance' ? '3px solid #667eea' : 'none', color: activeTab === 'balance' ? '#667eea' : '#666', fontSize: '1.05rem'}}
                                         >
                                             <i className="bi bi-eye me-2"></i>Tổng Quan
                                         </button>
@@ -237,7 +260,7 @@ function Wallet () {
                                         <button 
                                             className={`nav-link ${activeTab === 'deposit' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('deposit')}
-                                            style={{borderBottom: activeTab === 'deposit' ? '3px solid #667eea' : 'none', color: activeTab === 'deposit' ? '#667eea' : '#666'}}
+                                            style={{borderBottom: activeTab === 'deposit' ? '3px solid #667eea' : 'none', color: activeTab === 'deposit' ? '#667eea' : '#666', fontSize: '1.05rem'}}
                                         >
                                             <i className="bi bi-plus-circle me-2"></i>Nạp Tiền
                                         </button>
@@ -246,7 +269,7 @@ function Wallet () {
                                         <button 
                                             className={`nav-link ${activeTab === 'withdraw' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('withdraw')}
-                                            style={{borderBottom: activeTab === 'withdraw' ? '3px solid #667eea' : 'none', color: activeTab === 'withdraw' ? '#667eea' : '#666'}}
+                                            style={{borderBottom: activeTab === 'withdraw' ? '3px solid #667eea' : 'none', color: activeTab === 'withdraw' ? '#667eea' : '#666', fontSize: '1.05rem'}}
                                         >
                                             <i className="bi bi-dash-circle me-2"></i>Rút Tiền
                                         </button>
@@ -255,7 +278,7 @@ function Wallet () {
                                         <button 
                                             className={`nav-link ${activeTab === 'history' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('history')}
-                                            style={{borderBottom: activeTab === 'history' ? '3px solid #667eea' : 'none', color: activeTab === 'history' ? '#667eea' : '#666'}}
+                                            style={{borderBottom: activeTab === 'history' ? '3px solid #667eea' : 'none', color: activeTab === 'history' ? '#667eea' : '#666', fontSize: '1.05rem'}}
                                         >
                                             <i className="bi bi-clock-history me-2"></i>Lịch Sử Giao Dịch
                                         </button>
@@ -440,32 +463,62 @@ function Wallet () {
                                                         <th>Loại Giao Dịch</th>
                                                         <th>Số Tiền</th>
                                                         <th>Ngày</th>
-                                                        <th>Phương Thức</th>
                                                         <th>Trạng Thái</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {transactions.map((tx) => (
-                                                        <tr key={tx.id}>
-                                                            <td>
-                                                                {tx.type === 'deposit' && <><i className="bi bi-arrow-down-circle text-success me-2"></i>Nạp Tiền</>}
-                                                                {tx.type === 'withdrawal' && <><i className="bi bi-arrow-up-circle text-danger me-2"></i>Rút Tiền</>}
-                                                                {tx.type === 'purchase' && <><i className="bi bi-bag-check text-info me-2"></i>Mua Hàng</>}
-                                                            </td>
-                                                            <td className={tx.amount > 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}>
-                                                                {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString('vi-VN', {minimumFractionDigits: 2})}₫
-                                                            </td>
-                                                            <td>{tx.date}</td>
-                                                            <td>{tx.method}</td>
-                                                            <td>
-                                                                {tx.status === 'success' && <span className="badge bg-success">Thành Công</span>}
-                                                                {tx.status === 'pending' && <span className="badge bg-warning">Đang Xử Lý</span>}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                    {paginatedTransactions.length === 0 ? (
+                                                        <tr><td colSpan="4" className="text-center text-muted py-4">Chưa có giao dịch nào</td></tr>
+                                                    ) : (
+                                                        paginatedTransactions.map((tx) => (
+                                                            <tr key={tx.transactionId}>
+                                                                <td>
+                                                                    {tx.type === 'DEPOSIT' && <><i className="bi bi-arrow-down-circle text-success me-2"></i>Nạp Tiền</>}
+                                                                    {tx.type === 'WITHDRAW' && <><i className="bi bi-arrow-up-circle text-danger me-2"></i>Rút Tiền</>}
+                                                                    {tx.type === 'PURCHASE' && <><i className="bi bi-bag-check text-info me-2"></i>Mua Hàng</>}
+                                                                    {tx.type === 'PAYMENT' && <><i className="bi bi-bag-check text-info me-2"></i>Thanh Toán</>}
+                                                                    {!['DEPOSIT', 'WITHDRAW', 'PURCHASE', 'PAYMENT'].includes(tx.type) && <>{tx.type}</>}
+                                                                </td>
+                                                                <td className={tx.type === 'DEPOSIT' ? 'text-success fw-bold' : 'text-danger fw-bold'}>
+                                                                    {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.amount.toLocaleString('vi-VN')}₫
+                                                                </td>
+                                                                <td>{new Date(tx.createdAt).toLocaleString('vi-VN')}</td>
+                                                                <td>
+                                                                    {tx.status === 'SUCCESS' && <span className="badge bg-success">Thành Công</span>}
+                                                                    {tx.status === 'PENDING' && <span className="badge bg-warning">Đang Xử Lý</span>}
+                                                                    {tx.status === 'FAILED' && <span className="badge bg-danger">Thất Bại</span>}
+                                                                    {!['SUCCESS', 'PENDING', 'FAILED'].includes(tx.status) && <span className="badge bg-secondary">{tx.status}</span>}
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
                                                 </tbody>
                                             </table>
                                         </div>
+
+                                        {/* Pagination controls */}
+                                        {totalPages > 1 && (
+                                            <div className="d-flex justify-content-between align-items-center mt-3">
+                                                <div className="text-muted">Hiển thị {(transactions.length === 0) ? 0 : ( (page - 1) * pageSize + 1)} - {Math.min(page * pageSize, transactions.length)} / {transactions.length}</div>
+                                                <div>
+                                                    <nav>
+                                                        <ul className="pagination mb-0">
+                                                            <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}>
+                                                                <button className="page-link" onClick={() => setPage((p) => Math.max(1, p - 1))}>‹</button>
+                                                            </li>
+                                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                                                <li key={p} className={`page-item ${p === page ? 'active' : ''}`}>
+                                                                    <button className="page-link" onClick={() => setPage(p)}>{p}</button>
+                                                                </li>
+                                                            ))}
+                                                            <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}>
+                                                                <button className="page-link" onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>›</button>
+                                                            </li>
+                                                        </ul>
+                                                    </nav>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

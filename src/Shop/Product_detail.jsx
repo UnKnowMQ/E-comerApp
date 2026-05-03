@@ -196,7 +196,7 @@ const carouselId = 'productCarousel';
 
 <div className="container py-4">
   <div className="pd-breadcrumb mb-3">
-    <span className="text-primary" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>Shopee</span>
+    <span className="text-primary" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>EShop</span>
     <span className="mx-2">&gt;</span>
     <span className="text-muted">{product?.category_name || 'Danh mục'}</span>
     <span className="mx-2">&gt;</span>
@@ -363,7 +363,7 @@ const carouselId = 'productCarousel';
               <i className="fas fa-comment-dots me-2"></i>
               Chat Ngay
             </button>
-            <button type="button" className="btn btn-outline-secondary">
+            <button type="button" className="btn btn-outline-secondary" onClick={() => navigate(`/ShopView?shopId=${shop.shopId}`)}>
               Xem Shop
             </button>
           </div>

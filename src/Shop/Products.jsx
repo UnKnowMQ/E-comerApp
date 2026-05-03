@@ -121,7 +121,7 @@ function Products () {
             `${import.meta.env.VITE_APP_API}/product/category/${selectedCategoryId}`,
             {
               params: { pageNo: pageNoForCategoryApi, pageSize: 10, categoryId: selectedCategoryId },
-              headers: { "Content-Type": "application/json" },
+              headers: { "accept": "*/*" },
             }
           );
 

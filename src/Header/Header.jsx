@@ -169,7 +169,7 @@ const checkAuth = async () => {
 						<li class="nav-item active">
 							<a class="nav-link" href="/">Trang chủ</a>
 						</li>
-						<li><a class="nav-link" href="/Products">Của hàng</a></li>
+						<li><a class="nav-link" href="/Products">Cửa hàng</a></li>
 						<li><a class="nav-link" href="about.html">About us</a></li>
 						<li><a class="nav-link" href="services.html">Dịch vụ</a></li>
 						<li>
@@ -236,6 +236,11 @@ const checkAuth = async () => {
                 <button className="dropdown-item">Đổi mật khẩu</button>
               </li>
               <li>
+                <a className="dropdown-item" href="/OrderTracking" style={{textDecoration: 'none', color: 'inherit'}}>
+                  <i className="bi bi-bag-check me-2"></i>Đơn Mua
+                </a>
+              </li>
+              <li>
                 <a className="dropdown-item" href="/Wallet" style={{textDecoration: 'none', color: 'inherit'}}>
                   <i className="bi bi-wallet2 me-2"></i>Ví của tôi
                 </a>
@@ -246,10 +251,26 @@ const checkAuth = async () => {
               <li>
                 <button
                   className="dropdown-item"
-                  onClick={() => {
+                  onClick={async () => {
+                    try {
+                      const refreshToken = localStorage.getItem("refreshToken");
+                      if (refreshToken) {
+                        await axios.post(
+                          `${import.meta.env.VITE_APP_API}/auth/logout`,
+                          { refreshToken }
+                        );
+                      }
+                    } catch (err) {
+                      console.error("Logout error:", err);
+                    }
                     setUser(null);
                     localStorage.removeItem("jwt");
+                    localStorage.removeItem("refreshToken");
                     localStorage.removeItem("username");
+                    localStorage.removeItem("customerId");
+                    localStorage.removeItem("email");
+                    localStorage.removeItem("phone");
+                    localStorage.removeItem("roles");
                   }}
                 >
                   Đăng xuất

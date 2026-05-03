@@ -120,11 +120,11 @@ function Login() {
                   <form className="row g-3 needs-validation" novalidate>
 
                     <div className="col-12">
-                      <label for="yourUsername" className="form-label">Username</label>
+                      <label for="yourUsername" className="form-label">Tên đăng nhập</label>
                       <div className="input-group has-validation">
                         <span className="input-group-text" id="inputGroupPrepend">@</span>
                         <input type="text" name="username" className="form-control" id="yourUsername" required/>
-                        <div className="invalid-feedback">Please enter your username.</div>
+                        <div className="invalid-feedback">Vui lòng nhập tên đăng nhập của bạn.</div>
                       </div>
                     </div>
 
