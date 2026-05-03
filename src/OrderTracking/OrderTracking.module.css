@@ -1,0 +1,329 @@
+.orderContainer {
+  max-width: 1200px;
+  margin: 100px auto 40px;
+  padding: 0 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 12px 24px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: #555;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tab:hover {
+  color: #ee4d2d;
+}
+
+.tabActive {
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ee4d2d;
+}
+
+.searchBar {
+  margin-bottom: 20px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: #ee4d2d;
+}
+
+.orderCard {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.shopInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shopBadge {
+  background: #ee4d2d;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.shopName {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.chatBtn {
+  background: #ee4d2d;
+  color: #fff;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.orderStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.statusIcon {
+  color: #26aa99;
+}
+
+.statusText {
+  color: #26aa99;
+  font-weight: 500;
+}
+
+.statusDone {
+  color: #26aa99;
+}
+
+.statusPending {
+  color: #f59e0b;
+}
+
+.statusShipping {
+  color: #3b82f6;
+}
+
+.statusCancelled {
+  color: #ef4444;
+}
+
+.statusLabel {
+  color: #ee4d2d;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.orderBody {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.productImage {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #eee;
+  background: #f5f5f5;
+}
+
+.productImagePlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 12px;
+}
+
+.productInfo {
+  flex: 1;
+}
+
+.productName {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.productVariant {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.productQty {
+  font-size: 13px;
+  color: #999;
+}
+
+.productPrice {
+  text-align: right;
+}
+
+.priceOriginal {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 13px;
+}
+
+.priceFinal {
+  color: #ee4d2d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.totalAmount {
+  font-size: 14px;
+  color: #333;
+}
+
+.totalAmount span {
+  color: #ee4d2d;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.orderActions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnBuyAgain {
+  background: #ee4d2d;
+  color: #fff;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnBuyAgain:hover {
+  background: #d73211;
+}
+
+.btnContact {
+  background: #fff;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnContact:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.emptyState p {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 14px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pageBtn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.pageBtn:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+}
+
+.pageBtnActive {
+  background: #ee4d2d;
+  color: #fff;
+  border-color: #ee4d2d;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.orderCode {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+  padding-left: 16px;
+}
