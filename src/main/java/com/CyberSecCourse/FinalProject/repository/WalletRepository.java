@@ -33,4 +33,6 @@ public interface WalletRepository  extends JpaRepository<Wallet, Integer> {
 """)
     WalletInformationResponse findWalletInformationByUserId(@Param("userId") Integer userId);
 
+
+
 }

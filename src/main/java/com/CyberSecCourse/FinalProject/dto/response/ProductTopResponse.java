@@ -20,4 +20,8 @@ public class ProductTopResponse {
     private Long quantity;
 
     private String name;
+
+    private Double discount;
+
+    private String img;
 }

@@ -4,6 +4,7 @@ package com.CyberSecCourse.FinalProject.controller;
 import com.CyberSecCourse.FinalProject.dto.request.AuthRequestDTO;
 import com.CyberSecCourse.FinalProject.dto.request.ProductShopRequestDTO;
 import com.CyberSecCourse.FinalProject.dto.request.ShopCreateRequestDTO;
+import com.CyberSecCourse.FinalProject.dto.request.UpdateProductRequestDTO;
 import com.CyberSecCourse.FinalProject.dto.response.*;
 import com.CyberSecCourse.FinalProject.repository.ShopRepository;
 import com.CyberSecCourse.FinalProject.service.ProductService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -34,6 +36,8 @@ public class ShopController {
     private final ShopServiceImpl shopService;
 
     private final ShopRepository shopRepository;
+
+    private final ProductServiceImpl   productService;
 
     @PostMapping("/")
     public ResponseData<?> createShop(@RequestBody ShopCreateRequestDTO shopCreateRequestDTO
@@ -116,6 +120,21 @@ public class ShopController {
             return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
         }
     }
+    @PutMapping("/product/{id}")
+    public ProductResponse updateProduct(
+            @PathVariable Integer id,
+            @RequestBody UpdateProductRequestDTO dto
+    ){
+        return productService.updateProduct(id, dto);
+    }
+    @GetMapping("/check-shop")
+    public Map<String, Boolean> checkUserHasShop(
+            @RequestParam Integer userId
+    ){
+        boolean hasShop = shopRepository.findShopByUserId(userId) != null;
 
-
+        return Map.of(
+                "hasShop", hasShop
+        );
+    }
 }

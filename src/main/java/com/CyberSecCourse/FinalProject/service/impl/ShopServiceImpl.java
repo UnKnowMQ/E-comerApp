@@ -60,7 +60,10 @@ public class ShopServiceImpl implements ShopService {
                 .shopAddress(shopCreateRequestDTO.getShopAddress())
                 .build();
         shopRepository.save(shop);
+
         return shop;
+
+
     }
 
     @Override
@@ -97,6 +100,8 @@ public class ShopServiceImpl implements ShopService {
 
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
+
+        product.setSaleVolume(0);
 
         // 4. Save product
         Product savedProduct = productRepository.save(product);

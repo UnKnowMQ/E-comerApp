@@ -15,7 +15,7 @@ public interface ProductService {
 
     List<String> getUrlImageByProductId(int id);
 
-    List<ProductTopResponse> getTopProduct();
+    List<ProductTopResponse> getTopProduct(int limit);
 
     void approveProduct(Integer productId);
 

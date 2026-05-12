@@ -88,6 +88,9 @@ public class Product{
     @JsonIgnore
     private Set<Specification> specifications;
 
+    @Column(name = "discount")
+    private Double discount;
+
 
 
 }

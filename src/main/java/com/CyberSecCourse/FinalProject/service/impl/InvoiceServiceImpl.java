@@ -24,10 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -141,6 +138,45 @@ public class InvoiceServiceImpl implements InvoiceService {
         });
 
         return getByShopId;
+    }
+    public Page<InvoiceResponse> getInvoicesByUserId(Integer userId, int pageNo, int pageSize, String sortBy) {
+
+        Pageable pageable = PageRequest.of(
+                Math.max(pageNo - 1, 0),
+                pageSize,
+                Sort.by(sortBy).descending()
+        );
+
+        Page<InvoiceResponse> getByUserId = invoiceRepository.findByUserId(userId,pageable);
+
+        getByUserId.forEach(invoice ->{
+            invoice.setDetails(
+                    invoiceDetailRepository.findByInvoiceId(invoice.getInvoiceId()).stream().map(d->
+                            InvoiceDetailResponse.builder()
+                                    .productId(d.getProduct().getId())
+                                    .productName(d.getProduct().getProductName())
+                                    .quantity(d.getQuantity())
+                                    .unitPrice(d.getUnitPrice())
+                                    .build()  ).toList());
+        });
+
+        return getByUserId;
+    }
+    public Optional<InvoiceResponse> getInvoicesById(Integer invoiceId) {
+
+        Optional<InvoiceResponse> getByInvoiceId = invoiceRepository.findInvoiceById(invoiceId);
+
+        List<InvoiceDetail> invoiceDetail = invoiceDetailRepository.findByInvoiceId(getByInvoiceId.get().getInvoiceId());
+
+            getByInvoiceId.get().setDetails(
+                    invoiceDetail.stream().map(d->
+                            InvoiceDetailResponse.builder()
+                                    .productId(d.getProduct().getId())
+                                    .productName(d.getProduct().getProductName())
+                                    .quantity(d.getQuantity())
+                                    .unitPrice(d.getUnitPrice())
+                                    .build()  ).toList());
+        return getByInvoiceId;
     }
 
     private boolean isValidTransition(InvoiceStatus current, InvoiceStatus next) {

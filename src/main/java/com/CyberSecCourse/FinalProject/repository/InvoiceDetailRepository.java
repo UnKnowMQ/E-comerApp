@@ -15,4 +15,6 @@ public interface InvoiceDetailRepository  extends JpaRepository<InvoiceDetail, I
     @Query("Select i from InvoiceDetail i where i.invoice.invoice_id = :invoiceId")
     List<InvoiceDetail> findByInvoiceId(int invoiceId);
 
+
+
 }

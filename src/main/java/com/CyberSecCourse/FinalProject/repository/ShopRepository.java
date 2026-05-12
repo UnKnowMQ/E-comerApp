@@ -24,4 +24,5 @@ public interface ShopRepository extends JpaRepository<Shop,Integer> {
     Shop findShopByProduct(Integer productId);
 
 
+
 }

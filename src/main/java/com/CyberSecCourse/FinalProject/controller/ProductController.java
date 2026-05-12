@@ -105,9 +105,9 @@ public class ProductController {
         }
     }
     @GetMapping("/get-top-product")
-    public ResponseData<?> getTopProduct( ) {
+    public ResponseData<?> getTopProduct(@RequestParam int limit ) {
         try{
-            return new ResponseData<>(HttpStatus.OK.value(),"Product found!",productService.getTopProduct());
+            return new ResponseData<>(HttpStatus.OK.value(),"Product found!",productService.getTopProduct(limit));
         }
         catch (Exception e)
         {

@@ -31,8 +31,21 @@ public class InvoiceController {
     public ResponseData<?> getProductMultipleSearchCol(@RequestParam String status,
                                                        @RequestParam Long orderCode
     ) {
+            try{
+                return new ResponseData<>(HttpStatus.OK.value(),"Edit Invoice Status!",checkoutService.checkOut2(status,orderCode));
+            }
+            catch (Exception e)
+            {
+                log.error("there is an error in invoice api: {}",e.getMessage());
+                return new ResponseError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+            }
+    }
+    @GetMapping("/{invoiceId}")
+    public ResponseData<?> getInvoiceById(@RequestParam Integer invoiceId
+
+    ) {
         try{
-            return new ResponseData<>(HttpStatus.OK.value(),"Edit Invoice Status!",checkoutService.checkOut2(status,orderCode));
+            return new ResponseData<>(HttpStatus.OK.value(),"Get Invoice !",invoiceService.getInvoicesById(invoiceId));
         }
         catch (Exception e)
         {
@@ -49,6 +62,17 @@ public class InvoiceController {
     ) {
         return ResponseEntity.ok(
                 invoiceService.getInvoicesByShopId(shopId, pageNo, pageSize, sortBy)
+        );
+    }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getByUser(
+            @PathVariable Integer userId,
+            @RequestParam(defaultValue = "1") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "invoice_date") String sortBy
+    ) {
+        return ResponseEntity.ok(
+                invoiceService.getInvoicesByUserId(userId, pageNo, pageSize, sortBy)
         );
     }
     @PatchMapping("/seller/invoice/{id}/status")
