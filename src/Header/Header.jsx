@@ -26,15 +26,41 @@ import ProfileDropdown from './ProfileDropdown.jsx';
 function Header() {
   const navigate = useNavigate();
   const handleSignOut = () => {
-  axios.post('http://localhost:8099/auth/logout', null, {
-    withCredentials: true
-  })
-    .then(() => {
-      navigate('/Login');
-    })
-    .catch((err) => console.error(err));
-};
-const [user,setUser] = useState(null);
+    const refreshToken = localStorage.getItem('refreshToken');
+    const API_BASE = import.meta.env.VITE_API || 'http://localhost:8036';
+    
+    axios
+      .post(
+        `${API_BASE}/auth/logout`,
+        { refreshToken },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      )
+      .then(() => {
+        // Xoá tất cả dữ liệu từ localStorage
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('shop_alertMsg');
+        localStorage.removeItem('shop_alertType');
+        localStorage.removeItem('shoporders_alertMsg');
+        localStorage.removeItem('shoporders_alertType');
+        navigate('/Login');
+      })
+      .catch((err) => {
+        console.error('Logout error:', err);
+        // Vẫn xoá dữ liệu cục bộ ngay cả khi API error
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        navigate('/Login');
+      });
+  };
+  const [user, setUser] = useState(null);
 
 
 

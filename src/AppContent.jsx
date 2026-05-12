@@ -24,6 +24,7 @@ import ShopVerification from "./Shop/Shop_Verification";
 import ShopOrders from "./Shop/ShopOrders";
 import ShopProducts from "./Products/ShopProducts";
 import ShopProduct_add from "./Products/ShopProduct_add";
+import ShopProducts_edit from "./Products/ShopProducts_edit";
 import ProductApproval from "./Products/ProductApproval";
 import Theater_add from "./Theater/Theater_add";
 import Theater_edit from "./Theater/Theater_edit";
@@ -209,6 +210,7 @@ useEffect(() => {
         <Route path="/ShopOrders" element={<ShopOrders />} />
         <Route path="/ShopProducts" element={<ShopProducts />} />
         <Route path="/ShopProduct_add" element={<ShopProduct_add />} />
+        <Route path="/ShopProducts_edit" element={<ShopProducts_edit />} />
         <Route path="/ProductApproval" element={<ProductApproval />} />
         <Route path="/Theater_add" element={<Theater_add/>}/>
         <Route path="/Theater_edit" element={<Theater_edit/>}/>

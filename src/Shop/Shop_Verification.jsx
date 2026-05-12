@@ -90,7 +90,7 @@ const confirmAction = async () => {
       headers: { Authorization: `Bearer ${jwt}` }
     });
     
-    if(re.data.status === 200) {
+    if(re.data === 'Shop approved successfully' || re.data === 'Shop rejected successfully') {
           setShowActionModal(false);
           setShopToAction(null);
           localStorage.setItem('shop_verification_alertMsg', `${actionType === 'approve' ? 'Duyệt' : 'Từ chối'} cửa hàng thành công!`);

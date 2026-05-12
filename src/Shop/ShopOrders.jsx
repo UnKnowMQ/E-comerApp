@@ -150,6 +150,81 @@ function ShopOrders() {
     modal.show();
   };
 
+  // Update order status (seller)
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const updateOrderStatus = async (invoiceId, newStatus) => {
+    if (!shopId) return;
+    const jwt = localStorage.getItem('jwt');
+    setUpdatingStatus(true);
+    try {
+      const res = await axios.patch(
+        `${API_BASE}/invoice/seller/invoice/${invoiceId}/status`,
+        { status: newStatus },
+        {
+          params: { shopId },
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (res.status >= 200 && res.status < 300) {
+        // Update local state
+        setOrders((prev) =>
+          prev.map((o) => (o.invoiceId === invoiceId ? { ...o, status: newStatus } : o))
+        );
+        if (selectedOrder?.invoiceId === invoiceId) {
+          setSelectedOrder((prev) => ({ ...prev, status: newStatus }));
+        }
+        const successText =
+          typeof res.data === 'string' ? res.data : res.data?.message || 'Updated!';
+        setAlertMsg(`${successText} - Cập nhật trạng thái đơn hàng thành công!`);
+        setAlertType('success');
+      } else {
+        setAlertMsg('Cập nhật trạng thái thất bại!');
+        setAlertType('danger');
+      }
+    } catch (err) {
+      console.error(err);
+      const data = err.response?.data;
+      const errMsg =
+        (data && (data.error || data.message)) ||
+        (typeof data === 'string' ? data : null) ||
+        'Lỗi khi cập nhật trạng thái đơn hàng!';
+      setAlertMsg(errMsg);
+      setAlertType('danger');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  // Define allowed transitions for seller
+  const getNextStatusActions = (status) => {
+    const s = status?.toLowerCase();
+    const actions = [];
+    if (s === 'pending') {
+      actions.push({ status: 'wfad', label: 'Xác nhận đơn', color: 'info', icon: 'bi-check2' });
+      actions.push({ status: 'cancelled', label: 'Huỷ đơn', color: 'danger', icon: 'bi-x-circle' });
+    } else if (s === 'wfad') {
+      actions.push({ status: 'delivery', label: 'Bàn giao vận chuyển', color: 'primary', icon: 'bi-truck' });
+      actions.push({ status: 'cancelled', label: 'Huỷ đơn', color: 'danger', icon: 'bi-x-circle' });
+    } else if (s === 'delivery') {
+      actions.push({ status: 'done', label: 'Đã giao thành công', color: 'success', icon: 'bi-check-circle' });
+    } else if (s === 'rr') {
+      actions.push({ status: 'refunded', label: 'Xác nhận hoàn tiền', color: 'dark', icon: 'bi-cash-coin' });
+      actions.push({ status: 'done', label: 'Từ chối trả hàng', color: 'success', icon: 'bi-x-circle' });
+    }
+    return actions;
+  };
+
+  const handleStatusChange = (invoiceId, newStatus, label) => {
+    if (window.confirm(`Bạn có chắc muốn "${label}" cho đơn hàng #${invoiceId}?`)) {
+      updateOrderStatus(invoiceId, newStatus);
+    }
+  };
+
   const statusBadge = (status) => {
     const map = {
       pending: { color: 'warning', text: 'Chờ thanh toán' },
@@ -235,21 +310,35 @@ function ShopOrders() {
     },
     {
       name: 'Hành động',
-      cell: (row) => (
-        <div className="d-flex gap-1">
-          <button
-            className="btn btn-sm btn-info text-white"
-            title="Chi tiết"
-            onClick={() => openDetailModal(row)}
-          >
-            <i className="bi bi-eye-fill"></i>
-          </button>
-        </div>
-      ),
+      cell: (row) => {
+        const nextActions = getNextStatusActions(row.status);
+        return (
+          <div className="d-flex gap-1 flex-wrap">
+            <button
+              className="btn btn-sm btn-info text-white"
+              title="Chi tiết"
+              onClick={() => openDetailModal(row)}
+            >
+              <i className="bi bi-eye-fill"></i>
+            </button>
+            {nextActions.map((act) => (
+              <button
+                key={act.status}
+                className={`btn btn-sm btn-${act.color} text-white`}
+                title={act.label}
+                disabled={updatingStatus}
+                onClick={() => handleStatusChange(row.invoiceId, act.status, act.label)}
+              >
+                <i className={`bi ${act.icon}`}></i>
+              </button>
+            ))}
+          </div>
+        );
+      },
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '100px',
+      width: '180px',
     },
   ];
 
@@ -648,6 +737,24 @@ function ShopOrders() {
                                 </div>
                               </div>
                               <div className="modal-footer">
+                                {getNextStatusActions(selectedOrder.status).map((act) => (
+                                  <button
+                                    key={act.status}
+                                    type="button"
+                                    className={`btn btn-${act.color} text-white`}
+                                    disabled={updatingStatus}
+                                    onClick={() =>
+                                      handleStatusChange(
+                                        selectedOrder.invoiceId,
+                                        act.status,
+                                        act.label
+                                      )
+                                    }
+                                  >
+                                    <i className={`bi ${act.icon} me-1`}></i>
+                                    {act.label}
+                                  </button>
+                                ))}
                                 <button
                                   type="button"
                                   className="btn btn-secondary"

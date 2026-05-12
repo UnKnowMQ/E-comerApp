@@ -1,61 +1,71 @@
 
 
 function NavBar(){
+  const userData = JSON.parse(localStorage.getItem('user'));
+  const role = userData?.user?.data?.role ?? userData?.user?.data?.scope ?? '';
+  const isSeller = role?.toLowerCase() === 'seller';
+
     return (
   <aside id="sidebar" className="sidebar">
 
     <ul className="sidebar-nav " id="sidebar-nav" >
 
       <li className="nav-item">
-        <a className="nav-link" href="/" style={{fontSize: 'small'}}>
+        <a className="nav-link active" href="/" style={{fontSize: 'small'}}>
           <i className="bi bi-grid"></i>
           <span>Tổng quan</span>
         </a>
       </li>
 
-      <li className="nav-item">
-        <a className="nav-link" href="/Products" style={{fontSize: 'small'}}>
-          <i className="bi bi-film"></i>
-            Quản lý sản phẩm
-        </a>
-      </li>
-      <li className="nav-item">
-        <a className="nav-link" href="/ProductApproval" style={{fontSize: 'small'}}>
-          <i className="bi bi-clipboard2-check"></i>
-          Duyệt sản phẩm
-        </a>
-      </li>
-       <li className="nav-item">
-        <a className="nav-link" href="/Shop" style={{fontSize: 'small'}}>
-          <i className="bi bi-camera-reels"></i>
-  Quản lý shop
-        </a>
-      </li>
-       <li className="nav-item">
-        <a className="nav-link" href="/ShopProducts" style={{fontSize: 'small'}}>
-          <i className="bi bi-box-seam"></i>
-  Sản phẩm của shop
-        </a>
-      </li>
-       <li className="nav-item">
-        <a className="nav-link" href="/ShopOrders" style={{fontSize: 'small'}}>
-          <i className="bi bi-receipt"></i>
-  Đơn hàng của shop
-        </a>
-      </li>
-       <li className="nav-item">
-        <a className="nav-link" href="/Member" style={{fontSize: 'small'}}>
-          <i className="bi bi-people-fill"></i>
-  Quản lý thông tin khách hàng
-        </a>
-      </li>
-             <li className="nav-item">
-        <a className="nav-link" href="/Showtime" style={{fontSize: 'small'}}>
-          <i className="bi bi-calendar-fill"></i>
-  Quản lý suất chiếu
-        </a>
-      </li>
-              
+      {isSeller ? (
+        <>
+          <li className="nav-item">
+            <a className="nav-link" href="/ShopProducts" style={{fontSize: 'small'}}>
+              <i className="bi bi-box-seam"></i>
+              Sản phẩm của shop
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/ShopOrders" style={{fontSize: 'small'}}>
+              <i className="bi bi-receipt"></i>
+              Đơn hàng của shop
+            </a>
+          </li>
+        </>
+      ) : (
+        <>
+          <li className="nav-item">
+            <a className="nav-link" href="/Products" style={{fontSize: 'small'}}>
+             <i class="bi bi-cart-check"></i>
+              Quản lý sản phẩm
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/ProductApproval" style={{fontSize: 'small'}}>
+              <i className="bi bi-clipboard2-check"></i>
+              Duyệt sản phẩm
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/Shop" style={{fontSize: 'small'}}>
+              <i class="bi bi-shop"></i>
+              Quản lý shop
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/ShopProducts" style={{fontSize: 'small'}}>
+              <i className="bi bi-box-seam"></i>
+              Sản phẩm của shop
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/ShopOrders" style={{fontSize: 'small'}}>
+              <i className="bi bi-receipt"></i>
+              Đơn hàng của shop
+            </a>
+          </li>
+        </>
+      )}
 
       {/* <li className="nav-item">
         <a className="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
