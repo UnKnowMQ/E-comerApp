@@ -74,8 +74,8 @@ function EwalletConfirm() {
       if (res.data?.status === 200) {
         navigate("/PaymentResult", {
           state: {
+            isSuccess: true,
             invoiceId: checkout.invoiceId,
-            checkoutStatus: res.data?.data,
             message: res.data?.message,
             orderCode: checkout.orderCode,
           },

@@ -31,7 +31,7 @@ function Login() {
       username: '',
       email: '',
       password: '',
-      retypePassword: '',
+      retypePassword: '', 
       birthday: '',
       phone: ''
     });    

@@ -273,8 +273,41 @@ const carouselId = 'productCarousel';
           </div>
 
           <div className="pd-row mb-2">
+            <div className="pd-row-label">Kho</div>
+            <div className="pd-row-value text-muted">
+              {typeof product?.quantity === 'number'
+                ? new Intl.NumberFormat('vi-VN').format(product.quantity) + ' sản phẩm'
+                : product?.quantity ?? '—'}
+            </div>
+          </div>
+
+          <div className="pd-row mb-2">
+            <div className="pd-row-label">Bảo hành</div>
+            <div className="pd-row-value text-muted">{product?.warranty ?? '—'}</div>
+          </div>
+
+          <div className="pd-row mb-2 align-items-start">
             <div className="pd-row-label">Vận Chuyển</div>
-            <div className="pd-row-value text-muted">Không hỗ trợ</div>
+            <div className="pd-row-value">
+              <div className="d-flex flex-column gap-1">
+                {[
+                  { value: 'tietkiem', label: 'Giao hàng tiết kiệm', sub: '3–5 ngày' },
+                  { value: 'tieuchuan', label: 'Giao hàng tiêu chuẩn', sub: '2–3 ngày' },
+                  { value: 'nhanh', label: 'Giao hàng nhanh', sub: '1–2 ngày' },
+                ].map((opt) => (
+                  <label key={opt.value} className="d-flex align-items-center gap-2" style={{ cursor: 'pointer', fontWeight: 400 }}>
+                    <input
+                      type="radio"
+                      name="shippingMethod"
+                      value={opt.value}
+                      defaultChecked={opt.value === 'tietkiem'}
+                    />
+                    <span>{opt.label}</span>
+                    <span className="text-muted" style={{ fontSize: 12 }}>({opt.sub})</span>
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="pd-row mb-3">
@@ -309,11 +342,11 @@ const carouselId = 'productCarousel';
           </div>
 
           <div className="d-flex gap-3">
-            <button className="btn btn-outline-danger px-4" onClick={handleToCart}>
+            <button className="btn btn-success px-4" style={{ backgroundColor: '#198754', borderColor: '#198754', color: '#fff' }} onClick={handleToCart}>
               <i className="fas fa-shopping-cart me-2"></i>
               Thêm Vào Giỏ Hàng
             </button>
-            <button className="btn btn-danger px-5" onClick={handleToInstantBuy}>
+            <button className="btn btn-danger px-5" style={{ backgroundColor: '#dc3545', borderColor: '#dc3545', color: '#fff' }} onClick={handleToInstantBuy}>
               Mua Ngay
             </button>
           </div>
@@ -321,7 +354,12 @@ const carouselId = 'productCarousel';
           {product?.description && (
             <div className="mt-4">
               <div className="fw-semibold mb-1">Mô tả</div>
-              <div className="text-muted">{product.description}</div>
+              <div className="text-muted" style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}>{product.description}</div>
             </div>
           )}
         </div>

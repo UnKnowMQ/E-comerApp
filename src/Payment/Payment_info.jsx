@@ -51,7 +51,7 @@ const [username, setUsername] = useState(localStorage.getItem("username") || "Gu
   const [multiShopCart, setMultiShopCart] = useState(false);
   
 
-  const { id } = location.state || {};
+  const { id, cartItems: cartItemsFromState } = location.state || {};
   const isSingleProduct = id !== undefined;
 
   const total = useMemo(() => {
@@ -101,6 +101,12 @@ useEffect(() => {
 
   useEffect(() => {
     if (id !== undefined) return;
+
+    // Nếu Cart truyền cartItems qua state thì dùng luôn, không gọi lại API
+    if (cartItemsFromState && cartItemsFromState.length > 0) {
+      setCartItems(cartItemsFromState);
+      return;
+    }
 
     axios.get(`${import.meta.env.VITE_APP_API}/cart/get-cart-by-customer-id`, {
       params: { customerId: localStorage.getItem("username") },
@@ -174,6 +180,44 @@ const  handleToPayment = (e) => {
     e.preventDefault();
     if (username === "Guest") {
       setShowLogin(true);
+      return;
+    }
+
+    // Thanh toán bằng Ví Wallet
+    if (paymentType === "WALLET") {
+      const token = localStorage.getItem("jwt");
+      const payload = {
+        invoiceRequest: {
+          invoice_date: new Date().toISOString().slice(0, 10),
+          total_amount: total,
+          payment_method: "WALLET",
+          shipping_address: address,
+          invoice_status: "pending",
+          note: "Thanh toán đơn hàng",
+          customerId: Number(localStorage.getItem("customerId")),
+          shopId: shopId,
+        },
+      };
+
+      axios
+        .post(`${import.meta.env.VITE_APP_API}/checkout/wallet`, payload, {
+          headers: {
+            accept: "*/*",
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          if (res.data?.status === 200) {
+            navigate("/PaymentResult", { state: { isSuccess: true, message: res.data.message, invoiceId: res.data.data } });
+          } else {
+            alert(res.data?.message || "Thanh toán thất bại");
+          }
+        })
+        .catch((err) => {
+          console.error("Error wallet checkout:", err);
+          alert(err.response?.data?.message || err.message || "Thanh toán thất bại");
+        });
       return;
     }
 
@@ -418,8 +462,12 @@ const paymentData = {
               <label className="form-check-label" for="credit">Ship COD</label>
             </div>
             <div className="form-check">
-              <input id="debit" name="paymentMethod" type="radio" className="form-check-input"  onChange={paymentTypeChange} value={"EWALLET"} required/>
+              <input id="debit" name="paymentMethod" type="radio" className="form-check-input" onChange={paymentTypeChange} value={"EWALLET"} required/>
               <label className="form-check-label" for="debit">Ví EWallet</label>
+            </div>
+            <div className="form-check">
+              <input id="wallet" name="paymentMethod" type="radio" className="form-check-input" onChange={paymentTypeChange} value={"WALLET"} required/>
+              <label className="form-check-label" for="wallet">Ví điện tử (Wallet)</label>
             </div>
 
           </div>

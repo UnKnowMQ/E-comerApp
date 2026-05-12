@@ -14,18 +14,19 @@ function PaymentResult() {
   const invoiceId = location.state?.invoiceId;
   const checkoutStatus = location.state?.checkoutStatus;
   const message = location.state?.message;
+  const isSuccessFromState = location.state?.isSuccess === true;
 
   const normalizedStatus = useMemo(() => {
-    const raw = (statusFromQuery ?? checkoutStatus ?? "").toString().trim();
+    const raw = (checkoutStatus ?? statusFromQuery ?? "").toString().trim();
     return raw.toLowerCase();
   }, [statusFromQuery, checkoutStatus]);
 
-  const hasAnyStatus = Boolean((statusFromQuery && statusFromQuery.trim()) || (checkoutStatus && String(checkoutStatus).trim()));
+  const hasAnyStatus = isSuccessFromState || Boolean((statusFromQuery && statusFromQuery.trim()) || (checkoutStatus && String(checkoutStatus).trim()));
 
   const isSuccess = useMemo(() => {
-    // Các trạng thái backend có thể trả về
+    if (isSuccessFromState) return true;
     return ["paid", "success", "shipping"].includes(normalizedStatus);
-  }, [normalizedStatus]);
+  }, [normalizedStatus, isSuccessFromState]);
     
   // axios.get(
   //     `${import.meta.env.VITE_APP_API}/Order`, 
