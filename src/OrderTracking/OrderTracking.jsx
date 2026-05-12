@@ -6,24 +6,32 @@ import styles from "./OrderTracking.module.css";
 const TABS = [
   { key: "all", label: "Tất cả" },
   { key: "pending", label: "Chờ thanh toán" },
-  { key: "shipping", label: "Vận chuyển" },
-  { key: "delivering", label: "Chờ giao hàng" },
+  { key: "wfad", label: "Chờ vận chuyển" },
+  { key: "delivery", label: "Vận chuyển" },
+  { key: "delivering", label: "Đang giao hàng" },
   { key: "done", label: "Hoàn thành" },
   { key: "cancelled", label: "Đã hủy" },
-  { key: "refund", label: "Trả hàng/Hoàn tiền" },
+  { key: "rr", label: "Yêu cầu hoàn/trả" },
+  { key: "refunded", label: "Đã hoàn tiền" },
 ];
 
+function normalizeStatus(status) {
+  return String(status || "").trim().toLowerCase();
+}
+
 function getStatusClass(status) {
-  switch (status) {
+  switch (normalizeStatus(status)) {
     case "done":
       return styles.statusDone;
     case "pending":
+    case "wfad":
       return styles.statusPending;
-    case "shipping":
+    case "delivery":
     case "delivering":
       return styles.statusShipping;
     case "cancelled":
-    case "refund":
+    case "rr":
+    case "refunded":
       return styles.statusCancelled;
     default:
       return "";
@@ -31,21 +39,25 @@ function getStatusClass(status) {
 }
 
 function getStatusLabel(status) {
-  switch (status) {
+  switch (normalizeStatus(status)) {
     case "done":
       return "HOÀN THÀNH";
     case "pending":
       return "CHỜ THANH TOÁN";
-    case "shipping":
+    case "wfad":
+      return "CHỜ VẬN CHUYỂN";
+    case "delivery":
       return "ĐANG VẬN CHUYỂN";
     case "delivering":
-      return "CHỜ GIAO HÀNG";
+      return "ĐANG GIAO HÀNG";
     case "cancelled":
       return "ĐÃ HỦY";
-    case "refund":
-      return "TRẢ HÀNG/HOÀN TIỀN";
+    case "rr":
+      return "YÊU CẦU HOÀN/TRẢ";
+    case "refunded":
+      return "ĐÃ HOÀN TIỀN";
     default:
-      return status?.toUpperCase() || "";
+      return String(status || "").toUpperCase();
   }
 }
 
@@ -96,7 +108,7 @@ function OrderTracking() {
   }, [page, userId]);
 
   const filteredOrders = orders.filter((order) => {
-    const matchTab = activeTab === "all" || order.status === activeTab;
+    const matchTab = activeTab === "all" || normalizeStatus(order.status) === activeTab;
     const matchSearch =
       !searchTerm ||
       order.shopName?.toLowerCase().includes(searchTerm.toLowerCase()) ||

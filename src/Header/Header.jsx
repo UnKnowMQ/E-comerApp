@@ -32,6 +32,7 @@ function Header() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null); // null = chưa login
+  const location = useLocation();
   const [registerForm, setRegisterForm] = useState({
     username: "",
     firstName: "",
@@ -109,6 +110,41 @@ function Header() {
     }
   };
 
+  const handleSellerChannel = async () => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+
+    const userId = localStorage.getItem("customerId");
+    const token = localStorage.getItem("jwt");
+
+    if (!userId || !token) {
+      setShowLogin(true);
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_APP_API}/shop/check-shop`, {
+        params: { userId },
+        headers: {
+          accept: "*/*",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data?.hasShop === true) {
+        window.location.href = import.meta.env.VITE_APP_BE_ENDPOINT;
+        return;
+      }
+
+      navigate("/ShopRegister");
+    } catch (err) {
+      console.error("Check shop error:", err);
+      alert("Không thể kiểm tra kênh người bán. Vui lòng thử lại.");
+    }
+  };
+
 
 const { showLogin, setShowLogin, showRegister, setShowRegister } = useContext(ModalContext);
 
@@ -176,13 +212,7 @@ const checkAuth = async () => {
 							<span
 								className="nav-link"
 								style={{ cursor: "pointer" }}
-								onClick={() => {
-									if (user) {
-										window.location.href = "/ShopRegister";
-									} else {
-										setShowLogin(true);
-									}
-								}}
+                onClick={handleSellerChannel}
 							>
 								Kênh người bán
 							</span>

@@ -5,25 +5,31 @@ import styles from "./OrderDetail.module.css";
 
 const STEPS = [
   { key: "pending", label: "Đơn Hàng Đã Đặt", icon: "📋" },
-  { key: "confirmed", label: "Đã Xác Nhận Thông Tin Thanh Toán", icon: "💰" },
-  { key: "shipping", label: "Đã Giao Cho ĐVVC", icon: "🚚" },
-  { key: "delivering", label: "Đã Nhận Được Hàng", icon: "📦" },
+  { key: "wfad", label: "Đã Xác Nhận Thanh Toán / Chờ Vận Chuyển", icon: "💰" },
+  { key: "delivery", label: "Đã Giao Cho ĐVVC", icon: "🚚" },
+  { key: "delivering", label: "Đang Giao Hàng", icon: "📦" },
   { key: "done", label: "Đơn Hàng Đã Hoàn Thành", icon: "⭐" },
 ];
 
+function normalizeStatus(status) {
+  return String(status || "").trim().toLowerCase();
+}
+
 function getActiveStep(status) {
-  switch (status) {
+  switch (normalizeStatus(status)) {
     case "pending":
       return 0;
-    case "confirmed":
+    case "wfad":
       return 1;
-    case "shipping":
+    case "delivery":
       return 2;
     case "delivering":
       return 3;
     case "done":
       return 4;
     case "cancelled":
+    case "rr":
+    case "refunded":
       return -1;
     default:
       return 0;
@@ -31,21 +37,25 @@ function getActiveStep(status) {
 }
 
 function getStatusTitle(status) {
-  switch (status) {
+  switch (normalizeStatus(status)) {
     case "done":
       return "ĐƠN HÀNG ĐÃ HOÀN THÀNH";
     case "pending":
       return "CHỜ THANH TOÁN";
-    case "confirmed":
-      return "ĐÃ XÁC NHẬN THANH TOÁN";
-    case "shipping":
+    case "wfad":
+      return "ĐÃ XÁC NHẬN THANH TOÁN - CHỜ VẬN CHUYỂN";
+    case "delivery":
       return "ĐANG VẬN CHUYỂN";
     case "delivering":
       return "ĐANG GIAO HÀNG";
     case "cancelled":
       return "ĐÃ HỦY";
+    case "rr":
+      return "YÊU CẦU HOÀN/TRẢ HÀNG";
+    case "refunded":
+      return "ĐÃ HOÀN TIỀN";
     default:
-      return status?.toUpperCase() || "";
+      return String(status || "").toUpperCase();
   }
 }
 
@@ -105,6 +115,7 @@ function OrderDetail() {
     return <div className={styles.container}><div className={styles.loading}>Không tìm thấy đơn hàng</div></div>;
   }
 
+  const normalizedOrderStatus = normalizeStatus(order.status);
   const activeStep = getActiveStep(order.status);
   const progressWidth = activeStep >= 0 ? `${(activeStep / (STEPS.length - 1)) * 100}%` : "0%";
 
@@ -122,7 +133,7 @@ function OrderDetail() {
       </div>
 
       {/* Timeline */}
-      {order.status !== "cancelled" && (
+      {!["cancelled", "rr", "refunded"].includes(normalizedOrderStatus) && (
         <div className={styles.timelineSection}>
           <div className={styles.timeline}>
             <div className={styles.timelineProgress} style={{ width: progressWidth }}></div>
